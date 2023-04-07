@@ -8,6 +8,12 @@ def combine_2rd_columns(col_1, col_2):
         result += " " + str(col_2)
     return result
 
+def extract_month(date) :
+    return str(date.year) + str(date.month).rjust(2, '0')
+
+def extract_day(date) :
+    return str(date.year) + str(date.month) + str(date.day).rjust(2, '0')
+
 df = pd.read_excel("sample_data1.xlsx")
 df["제품명 업데이트"] = df.apply(lambda x: combine_2rd_columns(x['제품(명)'], x['옵션1']), axis=1)
 
@@ -42,3 +48,29 @@ def top_company() :
     count = (count.to_dict())
     count_value = (list(count.values())[0])
     return [key, format(value, ','), count_value]
+
+# 일별 매출
+def days_sales() :
+    rev_by_day = df.set_index("일자").groupby(extract_day).sum()['공급합계']
+    data = (rev_by_day.to_dict())
+    count = df.set_index("일자").groupby(extract_day).count()['공급합계']
+    count = (count.to_dict())
+    count_value = (list(count.values()))
+    return list(data.keys()), list(data.values()), count_value
+
+# 월별 매출
+def monthly_sales() :
+    rev_by_month = df.set_index("일자").groupby(extract_month).sum()['공급합계']
+    data = (rev_by_month.to_dict())
+    count = df.set_index("일자").groupby(extract_month).count()['공급합계']
+    count = (count.to_dict())
+    count_value = (list(count.values()))
+    return list(data.keys()), list(data.values()), count_value
+
+def hourly_sales() :
+    rev_by_hour = df.set_index("일자").groupby(lambda date:date.hour).sum()['공급합계']
+    data = (rev_by_hour.to_dict())
+    count = df.set_index("일자").groupby(lambda date:date.hour).count()['공급합계']
+    count = (count.to_dict())
+    count_value = (list(count.values()))
+    return list(data.keys()), list(data.values()), count_value
