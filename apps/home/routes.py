@@ -8,19 +8,91 @@ from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data
 from apps.home.analyze_dashboard import *
+
 @blueprint.route('/index')
+def index_redirect() :
+    return redirect("/index/main")
+
+@blueprint.route('/index/<path:path>')
 # @login_required
-def index():
-    top_1_product_data = top_1_product()
-    top_company_data = top_company()
-    total_sales_data = total_sales()
-    total_count_data = total_count()
-    return render_template('home/index.html', segment='index', 
-                           total_sales_data = total_sales_data,
-                           total_count_data = total_count_data,
-                           top_1_product_data = top_1_product_data,
-                           top_company_data = top_company_data
-                           )
+def index(path):
+    if path == "main" :
+        top_1_product_data = top_1_product()
+        top_company_data = top_company()
+        total_sales_data = total_sales()
+        total_count_data = total_count()
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
+        for i in range(len(days_sales_values)) :
+            days_sales_values[i] = format(days_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = days_sales_keys,
+                            report_values = days_sales_values,
+                            report_counts = days_sales_counts
+                            )
+    # 시간별 매출
+    elif path == "hourly_report" :
+        top_1_product_data = top_1_product()
+        top_company_data = top_company()
+        total_sales_data = total_sales()
+        total_count_data = total_count()
+        hourly_sales_keys, hourly_sales_values, hourly_sales_counts = hourly_sales()
+        for i in range(len(hourly_sales_values)) :
+            hourly_sales_values[i] = format(hourly_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = hourly_sales_keys,
+                            report_values = hourly_sales_values,
+                            report_counts = hourly_sales_counts
+                            )
+    # 7일 매출
+    elif path == "weekly_report" :
+        top_1_product_data = top_1_product()
+        top_company_data = top_company()
+        total_sales_data = total_sales()
+        total_count_data = total_count()
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
+        days_sales_keys = days_sales_keys[:7]
+        days_sales_values = days_sales_values[:7]
+        days_sales_counts = days_sales_counts[:7]
+        for i in range(len(days_sales_values)) :
+            days_sales_values[i] = format(days_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = days_sales_keys,
+                            report_values = days_sales_values,
+                            report_counts = days_sales_counts
+                            )
+    # 30일 매출
+    elif path == "monthly_report" :
+        top_1_product_data = top_1_product()
+        top_company_data = top_company()
+        total_sales_data = total_sales()
+        total_count_data = total_count()
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
+        days_sales_keys = days_sales_keys[:30]
+        days_sales_values = days_sales_values[:30]
+        days_sales_counts = days_sales_counts[:30]
+        for i in range(len(days_sales_values)) :
+            days_sales_values[i] = format(days_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = days_sales_keys,
+                            report_values = days_sales_values,
+                            report_counts = days_sales_counts
+                            )
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 @login_required
