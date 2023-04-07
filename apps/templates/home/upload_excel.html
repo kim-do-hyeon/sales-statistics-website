@@ -1,0 +1,79 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Tables {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+      
+  {% include "includes/sidenav.html" %}
+
+  <main class="main-content position-relative border-radius-lg ">
+
+    {% include "includes/navigation.html" %}
+
+    <div class="container-fluid py-4">
+
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>판매 데이터 등록</h6>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div style="padding: 20px;">
+                <form action = "/upload_excel" method = "POST" enctype = "multipart/form-data">
+                    <input class="btn bg-gradient-dark mb-0" name="file" id="file" type="file" />
+                    <button type="submit" class="btn bg-gradient-dark mb-0">업로드</button>
+                </form>
+                <button class="btn btn-warning mb-0" onclick="location.href='/delete_excel/all' " style="float: right;">일괄 삭제</button>
+              </div>
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr class="align-middle text-center">
+                      <th class="text-uppercase text-secondary font-weight-bolder opacity-7">파일명</th>
+                      <th class="text-uppercase text-secondary font-weight-bolder opacity-7">적용 여부</th>
+                      <th class="text-uppercase text-secondary font-weight-bolder opacity-7">삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in data %}
+                    <tr>
+                      <td class="align-middle text-center">
+                        <p class="text-xs font-weight-bold mb-0">{{i.filename}}</p>
+                      </td>
+                      <td class="align-middle text-center">
+                        {% if i.active == 0 %}
+                          <p class="text-xs font-weight-bold mb-0">미적용</p>
+                        {% elif i.active == 1 %}
+                          <p class="text-xs font-weight-bold mb-0">적용됨</p>
+                        {% else %}
+                          <p class="text-xs font-weight-bold mb-0">오류</p>
+                        {% endif %}
+                      </td>
+                      <td class="align-middle text-center">
+                        <button class="btn btn-warning" onclick="location.href='/delete_excel/{{i.id}}'">삭제</button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% include "includes/footer.html" %}
+
+    </div>
+
+  </main>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

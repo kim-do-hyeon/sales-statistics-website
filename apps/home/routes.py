@@ -1,8 +1,12 @@
 # -*- encoding: utf-8 -*-
+import os
+from apps import db
 from apps.home import blueprint
-from flask import render_template, request
+from flask import render_template, request, flash, redirect
 from flask_login import login_required
 from jinja2 import TemplateNotFound
+from werkzeug.utils import secure_filename
+from apps.authentication.models import Excel_Data
 
 @blueprint.route('/index')
 @login_required
@@ -12,7 +16,33 @@ def index():
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 @login_required
 def upload_excel() :
-    return "AA"
+    if request.method == 'GET' :
+        data = Excel_Data.query.all()
+        return render_template('home/upload_excel.html', data = data)
+    elif request.method == 'POST' :
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        file.save(os.path.join("apps/upload_excel", filename))
+        data = Excel_Data(filename = str(filename), active = 1)
+        db.session.add(data)
+        db.session.commit()
+        flash("엑셀 파일이 등록되었습니다.")
+        return redirect('/upload_excel')
+
+@blueprint.route('/delete_excel/<path:subpath>')
+@login_required
+def delete_excel(subpath) :
+    if subpath == 'all' :
+        data = Excel_Data.query.all()
+        for i in data :
+            db.session.delete(i)
+        db.session.commit()
+    else :
+        data = Excel_Data.query.filter_by(id = subpath).first()
+        db.session.delete(data)
+        db.session.commit()
+    flash("파일이 삭제되었습니다.")
+    return redirect('/upload_excel')
 
 @blueprint.route('/<template>')
 @login_required
