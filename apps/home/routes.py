@@ -17,11 +17,13 @@ def index_redirect() :
 @blueprint.route('/index/<path:path>', methods=['GET', 'POST'])
 # @login_required
 def index(path):
+    # Basic
+    top_1_product_data = top_1_product()
+    top_company_data = top_company()
+    total_sales_data = total_sales()
+    total_count_data = total_count()
+
     if path == "main" :
-        top_1_product_data = top_1_product()
-        top_company_data = top_company()
-        total_sales_data = total_sales()
-        total_count_data = total_count()
         days_sales_keys, days_sales_values, days_sales_counts = days_sales()
         for i in range(len(days_sales_values)) :
             days_sales_values[i] = format(days_sales_values[i], ",")
@@ -36,10 +38,6 @@ def index(path):
                             )
     # 시간별 매출
     elif path == "hourly_report" :
-        top_1_product_data = top_1_product()
-        top_company_data = top_company()
-        total_sales_data = total_sales()
-        total_count_data = total_count()
         hourly_sales_keys, hourly_sales_values, hourly_sales_counts = hourly_sales()
         for i in range(len(hourly_sales_values)) :
             hourly_sales_values[i] = format(hourly_sales_values[i], ",")
@@ -54,10 +52,6 @@ def index(path):
                             )
     # 7일 매출
     elif path == "weekly_report" :
-        top_1_product_data = top_1_product()
-        top_company_data = top_company()
-        total_sales_data = total_sales()
-        total_count_data = total_count()
         days_sales_keys, days_sales_values, days_sales_counts = days_sales()
         days_sales_keys = days_sales_keys[:7]
         days_sales_values = days_sales_values[:7]
@@ -75,10 +69,6 @@ def index(path):
                             )
     # 30일 매출
     elif path == "monthly_report" :
-        top_1_product_data = top_1_product()
-        top_company_data = top_company()
-        total_sales_data = total_sales()
-        total_count_data = total_count()
         days_sales_keys, days_sales_values, days_sales_counts = days_sales()
         days_sales_keys = days_sales_keys[:30]
         days_sales_values = days_sales_values[:30]
@@ -103,10 +93,6 @@ def index(path):
         elif end == "" :
             flash("종료일이 선택되지 않았습니다.")
             return redirect("/index/main")
-        top_1_product_data = top_1_product()
-        top_company_data = top_company()
-        total_sales_data = total_sales()
-        total_count_data = total_count()
         specify_sales_key, specify_sales_values, specify_sales_counts = specify_sales(start, end)
         for i in range(len(specify_sales_values)) :
             specify_sales_values[i] = format(specify_sales_values[i], ",")
@@ -119,6 +105,68 @@ def index(path):
                             report_values = specify_sales_values,
                             report_counts = specify_sales_counts
                             )
+    elif path == "hourly_graph" :
+        hourly_sales_keys, hourly_sales_values, hourly_sales_counts = hourly_sales()
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            graph_labels = hourly_sales_keys,
+                            graph_datas = hourly_sales_values
+                            )
+    elif path == "weekly_graph" :
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
+        days_sales_keys = days_sales_keys[:7]
+        days_sales_values = days_sales_values[:7]
+        days_sales_counts = days_sales_counts[:7]
+        for i in range(len(days_sales_keys)) :
+            days_sales_keys[i] = int(days_sales_keys[i])
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            graph_labels = days_sales_keys,
+                            graph_datas = days_sales_values
+                            )
+    elif path == "monthly_graph" :
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
+        days_sales_keys = days_sales_keys[:30]
+        days_sales_values = days_sales_values[:30]
+        days_sales_counts = days_sales_counts[:30]
+        for i in range(len(days_sales_keys)) :
+            days_sales_keys[i] = int(days_sales_keys[i])
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            graph_labels = days_sales_keys,
+                            graph_datas = days_sales_values
+                            )
+    elif path == "setting_graph" :
+        start = (request.form['start'])
+        end = (request.form['end'])
+        if start == "" :
+            flash("시작일이 선택되지 않았습니다.")
+            return redirect("/index/main")
+        elif end == "" :
+            flash("종료일이 선택되지 않았습니다.")
+            return redirect("/index/main")
+        specify_sales_key, specify_sales_values, specify_sales_counts = specify_sales(start, end)
+        for i in range(len(specify_sales_key)) :
+            specify_sales_key[i] = int(specify_sales_key[i])
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            graph_labels = specify_sales_key,
+                            graph_datas = specify_sales_values,
+                            )
+
+
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 @login_required

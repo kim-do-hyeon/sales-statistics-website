@@ -17,10 +17,16 @@
             <div class="card-header pb-0 pt-3 bg-transparent">
               <h4 class="text-capitalize">판매 현황 그래프</h4>
               <div style="float:left">
-                <button class="btn bg-gradient-dark">최근 1일</button>
-                <button class="btn bg-gradient-dark">7일</button>
-                <button class="btn bg-gradient-dark">30일</button>
-                <button class="btn bg-gradient-dark">직접입력</button>
+                <button class="btn bg-gradient-dark" onclick="location.href='/index/hourly_graph'">시간별 매출</button>
+                <button class="btn bg-gradient-dark" onclick="location.href='/index/weekly_graph'">7일</button>
+                <button class="btn bg-gradient-dark" onclick="location.href='/index/monthly_graph'">30일</button>
+                <div style="display: inline-block;">
+                  <form action="/index/setting_graph" method="POST">
+                    <input type="date" id="start" name="start"/>
+                    <input type="date" id="end" name="end"/>
+                    <button type="submit" class="btn bg-gradient-dark">직접입력</button>
+                  </form>
+                </div>
               </div>
             </div>
             <div class="card-body p-3">
@@ -122,7 +128,7 @@
                   <button class="btn bg-gradient-dark" onclick="location.href='/index/monthly_report'">30일</button>
                 </div>
                 <div style="display: inline-block;">
-                  <form action="/index/setting_report" method="post">
+                  <form action="/index/setting_report" method="POST">
                     <input type="date" id="start" name="start"/>
                     <input type="date" id="end" name="end"/>
                     <button type="submit" class="btn bg-gradient-dark">직접입력</button>
@@ -191,9 +197,9 @@
     new Chart(ctx1, {
       type: "line",
       data: {
-        labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: {{graph_labels}},
         datasets: [{
-          label: "Mobile apps",
+          label: "판매금액",
           tension: 0.4,
           borderWidth: 0,
           pointRadius: 0,
@@ -201,9 +207,8 @@
           backgroundColor: gradientStroke1,
           borderWidth: 3,
           fill: true,
-          data: [500, 40, 300, 220, 500, 250, 400, 230, 500],
+          data: {{graph_datas}},
           maxBarThickness: 6
-
         }],
       },
       options: {
@@ -211,7 +216,7 @@
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: false,
+            display: true,
           }
         },
         interaction: {
@@ -221,10 +226,10 @@
         scales: {
           y: {
             grid: {
-              drawBorder: false,
+              drawBorder: true,
               display: true,
               drawOnChartArea: true,
-              drawTicks: false,
+              drawTicks: true,
               borderDash: [5, 5]
             },
             ticks: {
@@ -241,10 +246,10 @@
           },
           x: {
             grid: {
-              drawBorder: false,
-              display: false,
-              drawOnChartArea: false,
-              drawTicks: false,
+              drawBorder: true,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: true,
               borderDash: [5, 5]
             },
             ticks: {
