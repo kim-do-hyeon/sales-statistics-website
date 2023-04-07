@@ -67,10 +67,22 @@ def monthly_sales() :
     count_value = (list(count.values()))
     return list(data.keys()), list(data.values()), count_value
 
+# 시간별 매출
 def hourly_sales() :
     rev_by_hour = df.set_index("일자").groupby(lambda date:date.hour).sum()['공급합계']
     data = (rev_by_hour.to_dict())
     count = df.set_index("일자").groupby(lambda date:date.hour).count()['공급합계']
+    count = (count.to_dict())
+    count_value = (list(count.values()))
+    return list(data.keys()), list(data.values()), count_value
+
+# 특정 일자 매출 조회
+def specify_sales(start, end) :
+    mask = (df['일자'] >= start) & (df['일자'] <= end)
+    filtered_df = df.loc[mask]
+    rev_by_day = filtered_df.set_index("일자").groupby(extract_day).sum()['공급합계']
+    data = (rev_by_day.to_dict())
+    count = df.set_index("일자").groupby(extract_day).count()['공급합계']
     count = (count.to_dict())
     count_value = (list(count.values()))
     return list(data.keys()), list(data.values()), count_value

@@ -10,10 +10,11 @@ from apps.authentication.models import Excel_Data
 from apps.home.analyze_dashboard import *
 
 @blueprint.route('/index')
+# @login_required
 def index_redirect() :
     return redirect("/index/main")
 
-@blueprint.route('/index/<path:path>')
+@blueprint.route('/index/<path:path>', methods=['GET', 'POST'])
 # @login_required
 def index(path):
     if path == "main" :
@@ -92,6 +93,31 @@ def index(path):
                             report_keys = days_sales_keys,
                             report_values = days_sales_values,
                             report_counts = days_sales_counts
+                            )
+    elif path == "setting_report" :
+        start = (request.form['start'])
+        end = (request.form['end'])
+        if start == "" :
+            flash("시작일이 선택되지 않았습니다.")
+            return redirect("/index/main")
+        elif end == "" :
+            flash("종료일이 선택되지 않았습니다.")
+            return redirect("/index/main")
+        top_1_product_data = top_1_product()
+        top_company_data = top_company()
+        total_sales_data = total_sales()
+        total_count_data = total_count()
+        specify_sales_key, specify_sales_values, specify_sales_counts = specify_sales(start, end)
+        for i in range(len(specify_sales_values)) :
+            specify_sales_values[i] = format(specify_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = specify_sales_key,
+                            report_values = specify_sales_values,
+                            report_counts = specify_sales_counts
                             )
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])

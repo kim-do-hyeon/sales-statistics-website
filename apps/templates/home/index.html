@@ -114,11 +114,19 @@
             <div class="card-header pb-0 p-3">
               <div class="d-flex justify-content-between">
                 <h6 class="mb-2">판매 통합 리포트</h6>
-                <div>
+              </div>
+              <div class="col" style="float: right;">
+                <div style="display: inline-block;">
                   <button class="btn bg-gradient-dark" onclick="location.href='/index/hourly_report'">시간별 매출</button>
                   <button class="btn bg-gradient-dark" onclick="location.href='/index/weekly_report'">7일</button>
                   <button class="btn bg-gradient-dark" onclick="location.href='/index/monthly_report'">30일</button>
-                  <button class="btn bg-gradient-dark">직접입력</button>
+                </div>
+                <div style="display: inline-block;">
+                  <form action="/index/setting_report" method="post">
+                    <input type="date" id="start" name="start"/>
+                    <input type="date" id="end" name="end"/>
+                    <button type="submit" class="btn bg-gradient-dark">직접입력</button>
+                  </form>
                 </div>
               </div>
             </div>
