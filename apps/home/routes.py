@@ -7,11 +7,20 @@ from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data
-
+from apps.home.analyze_dashboard import *
 @blueprint.route('/index')
-@login_required
+# @login_required
 def index():
-    return render_template('home/index.html', segment='index')
+    top_1_product_data = top_1_product()
+    top_company_data = top_company()
+    total_sales_data = total_sales()
+    total_count_data = total_count()
+    return render_template('home/index.html', segment='index', 
+                           total_sales_data = total_sales_data,
+                           total_count_data = total_count_data,
+                           top_1_product_data = top_1_product_data,
+                           top_company_data = top_company_data
+                           )
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 @login_required
