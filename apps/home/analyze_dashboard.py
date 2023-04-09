@@ -31,7 +31,7 @@ def get_excel_files() :
 # 매출액
 def total_sales(df) :
     data  = ("전체매출", df['공급합계'].sum())
-    return [data[0], format(data[1], ',')]
+    return [data[0], format(int(data[1]), ',')]
 
 # 매출 건수
 def total_count(df) :
@@ -44,7 +44,7 @@ def top_1_product(df) :
     count = df.groupby('제품명 업데이트').count()['공급합계'].sort_values(ascending=False)[:1]
     data = (data.to_dict())
     key = (list(data.keys())[0])
-    value = (list(data.values())[0])
+    value = int(list(data.values())[0])
     count = (count.to_dict())
     count_value = (list(count.values())[0])
     return [key, format(value, ','), count_value]
@@ -55,7 +55,7 @@ def top_company(df) :
     count = df.groupby('업체분류').count()['공급합계'].sort_values(ascending=False)[:1]
     data = (data.to_dict())
     key = (list(data.keys())[0])
-    value = (list(data.values())[0])
+    value = int(list(data.values())[0])
     count = (count.to_dict())
     count_value = (list(count.values())[0])
     return [key, format(value, ','), count_value]
