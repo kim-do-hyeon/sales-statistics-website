@@ -1,8 +1,9 @@
 # -*- encoding: utf-8 -*-
 import os
 from apps import db
+import datetime
 from apps.home import blueprint
-from flask import render_template, request, flash, redirect
+from flask import render_template, request, flash, redirect, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
@@ -18,154 +19,81 @@ def index_redirect() :
 # @login_required
 def index(path):
     # Basic
-    top_1_product_data = top_1_product()
-    top_company_data = top_company()
-    total_sales_data = total_sales()
-    total_count_data = total_count()
+    global df
+    df = get_excel_files()
+    top_1_product_data = top_1_product(df)
+    top_company_data = top_company(df)
+    total_sales_data = total_sales(df)
+    total_count_data = total_count(df)
 
     if path == "main" :
-        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
-        for i in range(len(days_sales_values)) :
-            days_sales_values[i] = format(days_sales_values[i], ",")
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            report_keys = days_sales_keys,
-                            report_values = days_sales_values,
-                            report_counts = days_sales_counts
-                            )
-    # 시간별 매출
-    elif path == "hourly_report" :
-        hourly_sales_keys, hourly_sales_values, hourly_sales_counts = hourly_sales()
-        for i in range(len(hourly_sales_values)) :
-            hourly_sales_values[i] = format(hourly_sales_values[i], ",")
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            report_keys = hourly_sales_keys,
-                            report_values = hourly_sales_values,
-                            report_counts = hourly_sales_counts
-                            )
-    # 7일 매출
-    elif path == "weekly_report" :
-        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
-        days_sales_keys = days_sales_keys[:7]
-        days_sales_values = days_sales_values[:7]
-        days_sales_counts = days_sales_counts[:7]
-        for i in range(len(days_sales_values)) :
-            days_sales_values[i] = format(days_sales_values[i], ",")
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            report_keys = days_sales_keys,
-                            report_values = days_sales_values,
-                            report_counts = days_sales_counts
-                            )
-    # 30일 매출
-    elif path == "monthly_report" :
-        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
-        days_sales_keys = days_sales_keys[:30]
-        days_sales_values = days_sales_values[:30]
-        days_sales_counts = days_sales_counts[:30]
-        for i in range(len(days_sales_values)) :
-            days_sales_values[i] = format(days_sales_values[i], ",")
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            report_keys = days_sales_keys,
-                            report_values = days_sales_values,
-                            report_counts = days_sales_counts
-                            )
-    elif path == "setting_report" :
-        start = (request.form['start'])
-        end = (request.form['end'])
-        if start == "" :
-            flash("시작일이 선택되지 않았습니다.")
-            return redirect("/index/main")
-        elif end == "" :
-            flash("종료일이 선택되지 않았습니다.")
-            return redirect("/index/main")
-        specify_sales_key, specify_sales_values, specify_sales_counts = specify_sales(start, end)
-        for i in range(len(specify_sales_values)) :
-            specify_sales_values[i] = format(specify_sales_values[i], ",")
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            report_keys = specify_sales_key,
-                            report_values = specify_sales_values,
-                            report_counts = specify_sales_counts
-                            )
-    elif path == "hourly_graph" :
-        hourly_sales_keys, hourly_sales_values, hourly_sales_counts = hourly_sales()
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            graph_labels = hourly_sales_keys,
-                            graph_datas = hourly_sales_values
-                            )
-    elif path == "weekly_graph" :
-        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
-        days_sales_keys = days_sales_keys[:7]
-        days_sales_values = days_sales_values[:7]
-        days_sales_counts = days_sales_counts[:7]
-        for i in range(len(days_sales_keys)) :
-            days_sales_keys[i] = int(days_sales_keys[i])
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            graph_labels = days_sales_keys,
-                            graph_datas = days_sales_values
-                            )
-    elif path == "monthly_graph" :
-        days_sales_keys, days_sales_values, days_sales_counts = days_sales()
-        days_sales_keys = days_sales_keys[:30]
-        days_sales_values = days_sales_values[:30]
-        days_sales_counts = days_sales_counts[:30]
-        for i in range(len(days_sales_keys)) :
-            days_sales_keys[i] = int(days_sales_keys[i])
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            graph_labels = days_sales_keys,
-                            graph_datas = days_sales_values
-                            )
-    elif path == "setting_graph" :
-        start = (request.form['start'])
-        end = (request.form['end'])
-        if start == "" :
-            flash("시작일이 선택되지 않았습니다.")
-            return redirect("/index/main")
-        elif end == "" :
-            flash("종료일이 선택되지 않았습니다.")
-            return redirect("/index/main")
-        specify_sales_key, specify_sales_values, specify_sales_counts = specify_sales(start, end)
-        for i in range(len(specify_sales_key)) :
-            specify_sales_key[i] = int(specify_sales_key[i])
-        return render_template('home/index.html', segment='index', 
-                            total_sales_data = total_sales_data,
-                            total_count_data = total_count_data,
-                            top_1_product_data = top_1_product_data,
-                            top_company_data = top_company_data,
-                            graph_labels = specify_sales_key,
-                            graph_datas = specify_sales_values,
-                            )
+        days_sales_keys, days_sales_values, days_sales_counts = days_sales(df)
+        # Report 용 Key값
+        date_list = []
+        for date_str in days_sales_keys:
+            year = int(date_str[:4])
+            month = int(date_str[4:6])
+            day = int(date_str[6:])
+            date_obj = datetime.date(year, month, day)
+            date_list.append(date_obj.strftime("%Y년 %m월 %d일"))
 
+        # Graph 용 Key 값
+        graph_days_sales_keys = []
+        for i in days_sales_keys :
+            graph_days_sales_keys.append(int(i))
+        # Graph 용 Value 값
+        graph_days_sales_values = []
+        for i in days_sales_values :
+            graph_days_sales_values.append(i)
+
+        for i in range(len(days_sales_values)) :
+            days_sales_values[i] = format(days_sales_values[i], ",")
+        return render_template('home/index.html', segment='index', 
+                            total_sales_data = total_sales_data,
+                            total_count_data = total_count_data,
+                            top_1_product_data = top_1_product_data,
+                            top_company_data = top_company_data,
+                            report_keys = date_list,
+                            report_values = days_sales_values,
+                            report_counts = days_sales_counts,
+                            graph_labels = graph_days_sales_keys,
+                            graph_datas = graph_days_sales_values
+        )
+    # Ajax 통신으로 변경
+
+@blueprint.route("/ajax", methods=['POST', 'GET'])
+def ajax() :
+    if request.method == 'POST' :
+        global df
+        data = request.get_json()
+        if data['value'] == 'days' :
+            d_k, d_v, d_c = days_sales(df)
+        elif data['value'] == 'monthly' :
+            d_k, d_v, d_c = monthly_sales(df)
+        elif data['value'] == 'hourly' :
+            d_k, d_v, d_c = hourly_sales(df)
+        elif data['value'] == 'weekly' :
+            d_k, d_v, d_c = days_sales(df)
+            d_k = d_k[:7]
+            d_v = d_v[:7]
+        elif data['value'] == 'days_30' :
+            d_k, d_v, d_c = days_sales(df)
+            d_k = d_k[:30]
+            d_v = d_v[:30]
+        elif data['value'] == 'specify' :
+            d_k, d_v, d_c = specify_sales(df, data['start'], data['end'])
+
+        # Graph 용 Key 값
+        graph_label = []
+        for i in d_k :
+            graph_label.append(int(i))
+        # Graph 용 Value 값
+        graph_value = []
+        for i in d_v :
+            graph_value.append(i)
+
+        return jsonify(result='success', label=graph_label, value=graph_value)
+        
 
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
