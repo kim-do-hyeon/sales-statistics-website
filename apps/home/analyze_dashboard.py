@@ -98,3 +98,26 @@ def specify_sales(df, start, end) :
     count = (count.to_dict())
     count_value = (list(count.values()))
     return list(data.keys()), list(data.values()), count_value
+
+# 매출 분석 - 특정 일자 매출 조회
+def sales_analysis_specify(df, start, end, companys) :
+    df = df[df['업체분류'].isin(companys)]
+    mask = (df['일자'] >= start) & (df['일자'] <= end)
+    filtered_df = df.loc[mask]
+    return filtered_df
+
+# 매출 분석 - 최고 매출 일 조회
+def sales_analysis_max_sales(df) :
+    df['일자'] = pd.to_datetime(df['일자'])
+    rev_by_day = df.set_index("일자").groupby(extract_day).sum()['공급합계']
+    data = (rev_by_day.to_dict())
+    max_data = max(data, key = data.get)
+    return [max_data, format(int(data[max_data]), ',')]
+
+# 매출 분석 - 매출 채널
+def sales_analysis_companys(df) :
+    data = df.groupby('업체분류').sum()['공급합계'].sort_values(ascending=False)
+    data = (data.to_dict())
+    key = (list(data.keys()))
+    value = (list(data.values()))
+    return [key, value]

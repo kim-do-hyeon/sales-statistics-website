@@ -1,4 +1,4 @@
-1{% extends 'layouts/base.html' %}
+{% extends 'layouts/base.html' %}
 
 {% block title %} Dashboard {% endblock title %}
 
@@ -17,54 +17,16 @@
             <div class="card-header pb-0 pt-3 bg-transparent">
               <h4 class="text-capitalize">판매 현황 그래프</h4>
               <div style="float:left">
-                <button class="btn bg-gradient-dark" onclick="ajax_report('days')">일별 매출</button>
-                <button class="btn bg-gradient-dark" onclick="ajax_report('monthly')">월별 매출</button>
-                <button class="btn bg-gradient-dark" onclick="ajax_report('hourly')">시간별 매출</button>
-                <button class="btn bg-gradient-dark" onclick="ajax_report('weekly')">7일</button>
-                <button class="btn bg-gradient-dark" onclick="ajax_report('days_30')">30일</button>
+                <button class="btn bg-gradient-dark" onclick="ajax_grpah('days')">일별 매출</button>
+                <button class="btn bg-gradient-dark" onclick="ajax_grpah('monthly')">월별 매출</button>
+                <button class="btn bg-gradient-dark" onclick="ajax_grpah('hourly')">시간대별 매출</button>
+                <button class="btn bg-gradient-dark" onclick="ajax_grpah('weekly')">7일</button>
+                <button class="btn bg-gradient-dark" onclick="ajax_grpah('days_30')">30일</button>
                 <div style="display: inline-block;">
                     <input type="date" id="start" name="start"/>
                     <input type="date" id="end" name="end"/>
-                    <button onclick="ajax_report('specify')" class="btn bg-gradient-dark">직접입력</button>
+                    <button onclick="ajax_grpah('specify')" class="btn bg-gradient-dark">직접입력</button>
                 </div>
-                <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-                <script>
-                    function ajax_report(A) {
-                        if(A == 'specify'){
-                          var start = document.getElementById("start").value
-                          var end = document.getElementById("end").value
-                          if(start == ""){
-                            alert("시작일을 지정해 주세요.");
-                            return
-                          }
-                          if(end == ""){
-                            alert("종료일을 지정해 주세요.");
-                            return
-                          }
-                          var postdata = {'value' : A, 'start' : start, 'end' : end}
-                        }else{
-                          var postdata = {'value' : A}
-                        }
-
-                        $.ajax({
-                            type: 'POST',
-                            url: '/ajax',
-                            data : JSON.stringify(postdata),
-                            dataType : 'JSON',
-                            contentType: "application/json",
-                            success: function (response) {
-                                console.log(response.data)
-                                myChart.data.labels = response.label
-                                myChart.data.datasets[0].data = response.value
-                                myChart.update();
-                            },
-                            error: function(request, status, error){
-                                alert('통신 실패')
-                                alert(error);
-                            }
-                        })
-                    }
-                </script>
               </div>
             </div>
             <div class="card-body p-3">
@@ -76,74 +38,58 @@
         </div>
 
 
-        <div class="col-lg-4">
+        <div class="col-lg-5" style="text-align: center;">
           <h4 style="color:white">판매 현황 요약</h4>
-          <div class="row">
+          <div class="row" style="text-align: center;">
             <!-- 매출액 -->
             <div class="card col-6">
               <div class="card-body p-2">
-                <div class="row">
-                  <div class="col-8">
-                    <div class="numbers">
-                      <p class="text-sm mb-0 text-uppercase font-weight-bold">매출액</p>
-                      <h5 class="font-weight-bolder">
-                        {{total_sales_data[1]}}원
-                      </h5>
-                    </div>
-                  </div>
+                <div class="numbers" style="text-align: center;">
+                  <p class="text-sm mb-0 text-uppercase font-weight-bold">매출액</p>
+                  <h5 class="font-weight-bolder">
+                    {{total_sales_data[1]}}원
+                  </h5>
                 </div>
               </div>
             </div>
             <!-- 매출 건수 -->
             <div class="card col-6">
               <div class="card-body p-3">
-                <div class="row">
-                  <div class="col-8">
-                    <div class="numbers">
-                      <p class="text-sm mb-0 text-uppercase font-weight-bold">매출 건수</p>
-                      <h5 class="font-weight-bolder">
-                        {{total_count_data}}건
-                      </h5>
-                    </div>
-                  </div>
+                <div class="numbers">
+                  <p class="text-sm mb-0 text-uppercase font-weight-bold">매출 건수</p>
+                  <h5 class="font-weight-bolder">
+                    {{total_count_data}}건
+                  </h5>
                 </div>
               </div>
             </div>
             <!-- TOP 매출 채널 -->
             <div class="card col-6">
               <div class="card-body p-3">
-                <div class="row">
-                  <div class="col-8">
-                    <div class="numbers">
-                      <p class="text-sm mb-0 text-uppercase font-weight-bold">TOP 매출 채널</p>
-                      <h5 class="font-weight-bolder">
-                        {{top_company_data[0]}}
-                      </h5>
-                      <p class="mb-0">
-                        {{top_company_data[1]}}원<br>
-                        <span class="font-weight-bold">{{top_company_data[2]}}건</span>
-                      </p>
-                    </div>
-                  </div>
+                <div class="numbers">
+                  <p class="text-sm mb-0 text-uppercase font-weight-bold">TOP 매출 채널</p>
+                  <h5 class="font-weight-bolder">
+                    {{top_company_data[0]}}
+                  </h5>
+                  <p class="mb-0">
+                    {{top_company_data[1]}}원<br>
+                    <span class="font-weight-bold">{{top_company_data[2]}}건</span>
+                  </p>
                 </div>
               </div>
             </div>
             <!-- TOP 매출 품목  -->
             <div class="card col-6">
               <div class="card-body p-3">
-                <div class="row">
-                  <div class="col-8">
-                    <div class="numbers">
-                      <p class="text-sm mb-0 text-uppercase font-weight-bold">TOP 매출 품목</p>
-                      <h5 class="font-weight-bolder">
-                        {{top_1_product_data[0]}}
-                      </h5>
-                      <p class="mb-0">
-                        {{top_1_product_data[1]}}원<br>
-                        <span class="font-weight-bold">{{top_1_product_data[2]}}건</span>
-                      </p>
-                    </div>
-                  </div>
+                <div class="numbers">
+                  <p class="text-sm mb-0 text-uppercase font-weight-bold">TOP 매출 품목</p>
+                  <h5 class="font-weight-bolder">
+                    {{top_1_product_data[0]}}
+                  </h5>
+                  <p class="mb-0">
+                    {{top_1_product_data[1]}}원<br>
+                    <span class="font-weight-bold">{{top_1_product_data[2]}}건</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -222,7 +168,43 @@
 
 <!-- Specific JS goes HERE --> 
 {% block javascripts %}
-  
+  <script>
+    function ajax_grpah(A) {
+        if(A == 'specify'){
+          var start = document.getElementById("start").value
+          var end = document.getElementById("end").value
+          if(start == ""){
+            alert("시작일을 지정해 주세요.");
+            return
+          }
+          if(end == ""){
+            alert("종료일을 지정해 주세요.");
+            return
+          }
+          var postdata = {'type':'graph', 'value' : A, 'start' : start, 'end' : end}
+        }else{
+          var postdata = {'type':'graph', 'value' : A}
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/ajax',
+            data : JSON.stringify(postdata),
+            dataType : 'JSON',
+            contentType: "application/json",
+            success: function (response) {
+                console.log(response.data)
+                myChart.data.labels = response.label
+                myChart.data.datasets[0].data = response.value
+                myChart.update();
+            },
+            error: function(request, status, error){
+                alert('통신 실패')
+                alert(error);
+            }
+        })
+    }
+  </script>
   <script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
   <script>
     var ctx1 = document.getElementById("chart-line").getContext("2d");
