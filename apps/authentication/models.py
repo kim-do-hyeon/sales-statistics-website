@@ -24,6 +24,12 @@ class Excel_Data(db.Model, UserMixin) :
     filename = db.Column(db.Text)
     active = db.Column(db.Integer)
 
+class Product_Data(db.Model, UserMixin) :
+    __tablename__ = 'product_excel'
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.Text)
+    active = db.Column(db.Integer)
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()

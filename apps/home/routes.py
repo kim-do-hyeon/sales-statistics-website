@@ -7,7 +7,7 @@ from flask import render_template, request, flash, redirect, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
-from apps.authentication.models import Excel_Data
+from apps.authentication.models import Excel_Data, Product_Data
 from apps.home.analyze_dashboard import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
@@ -187,7 +187,7 @@ def analyze_sales() :
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
-@login_required
+# @login_required
 def upload_excel() :
     if request.method == 'GET' :
         data = Excel_Data.query.all()
@@ -202,8 +202,39 @@ def upload_excel() :
         flash("엑셀 파일이 등록되었습니다.")
         return redirect('/upload_excel')
 
+@blueprint.route('/upload_product', methods=['GET', 'POST'])
+# @login_required
+def upload_product() :
+    if request.method == 'GET' :
+        data = Product_Data.query.all()
+        return render_template('home/upload_product.html', data = data)
+    elif request.method == 'POST' :
+        file = request.files['file']
+        filename = secure_filename(file.filename)
+        file.save(os.path.join("apps/upload_product", filename))
+        data = Product_Data(filename = str(filename), active = 1)
+        db.session.add(data)
+        db.session.commit()
+        flash("엑셀 파일이 등록되었습니다.")
+        return redirect('/upload_product')
+    
+@blueprint.route('/delete_product/<path:subpath>')
+# @login_required
+def delete_product(subpath) :
+    if subpath == 'all' :
+        data = Product_Data.query.all()
+        for i in data :
+            db.session.delete(i)
+        db.session.commit()
+    else :
+        data = Product_Data.query.filter_by(id = subpath).first()
+        db.session.delete(data)
+        db.session.commit()
+    flash("파일이 삭제되었습니다.")
+    return redirect('/upload_product')
+
 @blueprint.route('/delete_excel/<path:subpath>')
-@login_required
+# @login_required
 def delete_excel(subpath) :
     if subpath == 'all' :
         data = Excel_Data.query.all()
