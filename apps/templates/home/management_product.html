@@ -1,0 +1,157 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Tables {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+      
+  {% include "includes/sidenav.html" %}
+
+  <main class="main-content position-relative border-radius-lg ">
+
+    {% include "includes/navigation.html" %}
+
+    <div class="container-fluid py-4">
+      <!-- 수기 입력 상품 등록 -->
+      <div class="row">
+        <form class="form-group d-flex" action="/product/register/wirte" method="POST">
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-control-label">구분</label>
+              <input class="form-control" name="type" type="text">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-control-label">제품명</label>
+              <input class="form-control" name="name" type="text">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-control-label">옵션</label>
+              <input class="form-control" name="standard" type="text">
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-control-label">규격</label>
+              <input class="form-control" name="standard_secondary" type="text">
+            </div>
+          </div>
+          <div class="form-group">
+            <button class="btn btn-warning mb-0">수기 등록</button>
+          </div>
+        </form>
+      </div>
+      <!-- 등록 전 상품 테이블 -->
+      <div class="row">
+        <div class="col-6">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>미등록 상품 테이블</h6>
+              <button class="btn btn-warning mb-0" onclick="location.href='/product/register/all' " style="float: right;">일괄 등록</button>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-secondary opacity-7">구분</th>
+                      <th class="text-secondary opacity-7">제품명</th>
+                      <th class="text-secondary opacity-7">옵션</th>
+                      <th class="text-secondary opacity-7">규격</th>
+                      <th class="text-secondary opacity-7">개별등록</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for key, value in data.items() %}
+                      {% for i in range(value|length) %}
+                      <tr>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{key}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{value[i][0]}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{value[i][2]}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{value[i][1]}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold"><a href="/product/register/custom/{{key}}/{{i}}">등록</a></span>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- 등록 후 상품테이블 -->
+        <div class="col-6">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>등록된 상품 테이블</h6>
+              <button class="btn btn-warning mb-0" onclick="location.href='/product/delete/all' " style="float: right;">일괄 삭제</button>
+            </div>
+            <div>
+            </div>
+            <div class="card-body px-0 pt-0 pb-2">
+              <div class="table-responsive p-0">
+                <table class="table align-items-center mb-0">
+                  <thead>
+                    <tr>
+                      <th class="text-secondary opacity-7">구분</th>
+                      <th class="text-secondary opacity-7">제품명</th>
+                      <th class="text-secondary opacity-7">옵션</th>
+                      <th class="text-secondary opacity-7">규격</th>
+                      <th class="text-secondary opacity-7">삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for i in product_data %}
+                      <tr>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{i.type}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{i.name}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{i.standard}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold">{{i.standard_secondary}}</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="text-secondary text-xs font-weight-bold"><a href="/product/delete/custom/{{i.id}}">삭제</a></span>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% include "includes/footer.html" %}
+
+    </div>
+
+  </main>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

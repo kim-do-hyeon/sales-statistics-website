@@ -7,8 +7,9 @@ from flask import render_template, request, flash, redirect, jsonify
 from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
-from apps.authentication.models import Excel_Data, Product_Data
+from apps.authentication.models import Excel_Data, Product_Data, Product_Details
 from apps.home.analyze_dashboard import *
+from apps.home.management_products import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
 # @login_required
@@ -202,6 +203,67 @@ def upload_excel() :
         flash("엑셀 파일이 등록되었습니다.")
         return redirect('/upload_excel')
 
+@blueprint.route('/management_product', methods=['GET', 'POST'])
+def management_proudct() :
+    df = get_upload_files()
+    data = get_products(df)
+    product_data = Product_Details.query.all()
+    return render_template("home/management_product.html",
+                           data = data,
+                           product_data = product_data)
+
+@blueprint.route('/product/<path:subpath>', methods=['GET', 'POST'])
+def product(subpath) :
+    subpath = subpath.split("/")
+    if request.method == 'POST' :
+        form_data_type = (request.form['type'])
+        form_data_name = request.form['name']
+        form_data_standard = request.form['standard']
+        form_data_standard_secondary = request.form['standard_secondary']
+        data = Product_Details(type = form_data_type, name = form_data_name, standard = form_data_standard, standard_secondary = form_data_standard_secondary)
+        db.session.add(data)
+        db.session.commit()
+        flash("데이터가 등록되었습니다.")
+        return redirect('/management_product')
+    else :
+        if subpath[0] == 'register' :
+            if subpath[1] == "all" :
+                df = get_upload_files()
+                data = get_products(df)
+                for key, value in data.items() :
+                    for i in value :
+                        data = Product_Details(type = str(key), name = i[0], standard = i[1], standard_secondary = i[2])
+                        db.session.add(data)
+                db.session.commit()
+                flash("모든 데이터가 등록되었습니다.")
+                return redirect('/management_product')
+            elif subpath[1] == "custom" :
+                key = subpath[2]
+                id = int(subpath[3])
+                print(key, id)
+                df = get_upload_files()
+                data = get_products(df)
+                custom_data = (data[key][id])
+                data = Product_Details(type = str(key), name = custom_data[0], standard = custom_data[1], standard_secondary = custom_data[2])
+                db.session.add(data)
+                db.session.commit()
+                flash("데이터가 등록되었습니다.")
+                return redirect('/management_product')
+        elif subpath[0] == 'delete' :
+            if subpath[1] == 'all' :
+                data = Product_Details.query.all()
+                for i in data :
+                    db.session.delete(i)
+                db.session.commit()
+                flash("모든 데이터가 삭제되었습니다.")
+                return redirect('/management_product')
+            elif subpath[1] == 'custom' :
+                data = Product_Details.query.filter_by(id = subpath[2]).first()
+                db.session.delete(data)
+                db.session.commit()
+                flash("데이터가 삭제되었습니다.")
+                return redirect('/management_product')
+
 @blueprint.route('/upload_product', methods=['GET', 'POST'])
 # @login_required
 def upload_product() :
@@ -249,7 +311,7 @@ def delete_excel(subpath) :
     return redirect('/upload_excel')
 
 @blueprint.route('/<template>')
-@login_required
+# @login_required
 def route_template(template):
     try:
         if not template.endswith('.html'):
