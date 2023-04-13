@@ -102,6 +102,24 @@ def ajax() :
                 else :
                     product_name.append(i.name + "/" + i.standard)
             return jsonify(result='success', data = product_name)
+        elif data['type'] == 'sales_report_by_date' :
+            selected_company = (data['companys'])
+            selected_item = data['selected_products']
+            start = (data['start'])
+            end = (data['end'])
+            df = get_excel_files()
+            processed_df = sepecify_product(df, selected_company, selected_item, start, end)
+            d_k, d_v, d_c = days_sales(processed_df)
+            for i in range(len(d_v)) :
+                d_v[i] = str(int(d_v[i]))
+            print(d_k, d_v)
+
+            data = processed_df.groupby('제품명 업데이트').sum()['공급합계'].sort_values(ascending=False)
+            data = (data.to_dict())
+            key = (list(data.keys()))
+            value = (list(data.values()))
+            return jsonify(result = 'success', d_k =d_k, d_v = d_v, table_key = key, table_value = value)
+
         
 '''
 요약 일자를 선택합니다. 
@@ -113,7 +131,7 @@ def ajax() :
 '''
 @blueprint.route('/sales_analysis', methods=['GET', 'POST'])
 # @login_required
-def analyze_sales() :
+def sales_analysis() :
     if request.method == 'GET' :
         df = get_excel_files()
         top_1_product_data = top_1_product(df)
@@ -221,20 +239,13 @@ def sales_report_by_date() :
             product_type.append(i[0])
         product_type = list(set(product_type))
         product_type = sorted(product_type)
-
+        d_k, d_v = [], []
+        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', 'green', 'blue', 'purple', 'black', 'white']
         return render_template("home/sales_report_by_date.html",
                             product_type = product_type,
-                            companys = companys)
-    elif request.method == 'POST' : 
-        selected_item = request.form.getlist("selected_item")
-        selected_company = request.form.getlist("selected_company")
-        start = request.form['start']
-        end = request.form['end']
-        print(selected_company)
-        print(selected_item)
-        df = get_excel_files()
-        sepecify_product(df, selected_company, selected_item, start, end)
-        return "A"
+                            companys = companys,
+                            d_k = d_k, d_v = d_v,
+                            colors = colors)
 
 
 
