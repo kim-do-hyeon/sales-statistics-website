@@ -119,6 +119,23 @@ def ajax() :
             key = (list(data.keys()))
             value = (list(data.values()))
             return jsonify(result = 'success', d_k =d_k, d_v = d_v, table_key = key, table_value = value)
+        elif data['type'] == 'sales_volume_report_by_date' :
+            selected_company = (data['companys'])
+            selected_item = data['selected_products']
+            start = (data['start'])
+            end = (data['end'])
+            df = get_excel_files()
+            processed_df = sepecify_product(df, selected_company, selected_item, start, end)
+            d_k, d_v, d_c = days_sales(processed_df)
+            for i in range(len(d_c)) :
+                d_c[i] = str(int(d_c[i]))
+            print(d_k, d_c)
+
+            data = processed_df.groupby('제품명 업데이트').sum()['수량'].sort_values(ascending=False)
+            data = (data.to_dict())
+            key = (list(data.keys()))
+            value = (list(data.values()))
+            return jsonify(result = 'success', d_k =d_k, d_c = d_c, table_key = key, table_value = value)
 
         
 '''
@@ -246,8 +263,36 @@ def sales_report_by_date() :
                             companys = companys,
                             d_k = d_k, d_v = d_v,
                             colors = colors)
+'''
+일자별 판매량 리포트 (품목별 일자별 판매량을 나타냅니다.) 
 
-
+- 리포트 조건을 선택합니다.　(기간 /품목 개별, 통합 선택) 
+- 판매 채널을 선택 합니다. (전체_통합 / 일부 선택 가능)
+- 품목을 선택합니다. (전체 / 일부 선택 가능)
+* 구분 / 제품명 / 옵션 1 / 옵션 2 각 단계별 선택할 수 있도록 하며 상위 조건 선택만으로도 조회 가능하도록 합니다. 
+  
+- 선택한 조건의 판매량(일자별 판매량 합)을 막대 그래프로 나타냅니다. (기간내 그래프는 일별, 주별, 월별로 선택할 수 있도록 합니다.) 
+- 선택한 기간내 품목별 일별 판매량을 표로 나타냅니다. (최대 30일간 조회) 
+'''
+@blueprint.route('/sales_volume_report_by_date', methods=['GET', 'POST'])
+def sales_volume_report_by_date() :
+    if request.method == 'GET' :
+        print("일자별 판매량 리포트")
+        df = get_excel_files()
+        companys = list(set(df['업체분류']))
+        product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
+        product_type = []
+        for i in product_type_sql :
+            product_type.append(i[0])
+        product_type = list(set(product_type))
+        product_type = sorted(product_type)
+        d_k, d_v = [], []
+        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', 'green', 'blue', 'purple', 'black', 'white']
+        return render_template("home/sales_volume_report_by_date.html",
+                            product_type = product_type,
+                            companys = companys,
+                            d_k = d_k, d_v = d_v,
+                            colors = colors)
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 # @login_required

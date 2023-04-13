@@ -1,0 +1,286 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Tables {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="min-height-300 bg-primary position-absolute w-100"></div>
+      
+  {% include "includes/sidenav.html" %}
+
+  <main class="main-content position-relative border-radius-lg ">
+
+    {% include "includes/navigation.html" %}
+
+    <div class="container-fluid py-4">
+      <h3 style="color:white">일자별 판매량 리포트</h3>
+      <div class="row">
+        <div class="col-12">
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>상세 조회 설정</h6>
+            </div>
+            <div class="row">
+              <div class="col-md-2">
+                <label>일자선택</label><br>
+                <label>시작</label><input class="form-control" type="date" id="start" name="start"/><br>
+                <label>종료</label><input class="form-control" type="date" id="end" name="end"/><br>
+              </div>
+              <div class="col-md-1">
+                <label>회사</label><br>
+                <select id="companybox" name="companybox" size="10" multiple ondblclick="select_company()">
+                  {% for i in companys %}
+                  <option value="{{i}}">{{i}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label>구분</label><br>
+                <select id="selectbox"" name="selectbox" size="10" onchange="chageLangSelect()">
+                  {% for i in product_type %}
+                    <option>{{i}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>제품명</label><br>
+                <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
+                </select>
+              </div>
+              <div class="col-md-1">
+                <label>선택 회사</label><br>
+                <select id="selected_company"" name="selected_company" size="10" multiple>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>선택 제품</label><br>
+                <select id="selected_item"" name="selected_item" size="10" multiple>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <button id="button" class="btn btn-warning mb-0" style="width: 100%" onclick="ajax_grpah()">분석</button>
+              </div>
+              <div class="col-md-6">
+                <button id="reset" class="btn btn-primary mb-0" style="width: 100%" onclick="reset()">초기화</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-6">
+          <div class="card mb-4">
+            <div class="card-body p-3">
+              <div class="card-header pb-0">
+                <h6>상세 조회 설정</h6>
+              </div>
+              <div class="row">
+                <div class="chart">
+                  <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="card mb-4">
+            <div class="card-body p-3">
+              <div class="card-header pb-0">
+                <h6>품목별 일별 판매량</h6>
+              </div>
+              <table id="table" class="table align-items-center mb-0">
+                <thead id="thead">
+                  <th>품목</th>
+                  <th>통합 판매량</th>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+              <table>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% include "includes/footer.html" %}
+
+    </div>
+
+  </main>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<script>
+  function ajax_grpah() {
+      var start = document.getElementById("start").value
+      var end = document.getElementById("end").value
+      if(start == ""){
+        alert("시작일을 지정해 주세요.");
+        return
+      }
+      if(end == ""){
+        alert("종료일을 지정해 주세요.");
+        return
+      }
+      var i;
+      var x = document.getElementById("selected_company");
+      var companys = [];
+      for (i = 0; i < x.length; i++) {
+        companys[i] = x.options[i].value;
+      }
+      var selected_products = [];
+      x = document.getElementById("selected_item");
+      for (i = 0; i < x.length; i++) {
+        selected_products[i] = x.options[i].value;
+      }
+      
+      const target = document.getElementById('button');
+      target.disabled = true;
+      // sales_report_by_date
+      var postdata = {"type" : "sales_volume_report_by_date", "companys" : companys, "selected_products" : selected_products, 'start' : start, 'end' : end}
+      $.ajax({
+          type: 'POST',
+          url: '/ajax',
+          data : JSON.stringify(postdata),
+          dataType : 'JSON',
+          contentType: "application/json",
+          success: function (response) {
+              console.log(response.data)
+              myChart.data.labels = response.d_k
+              myChart.data.datasets[0].data = response.d_c
+              myChart.update();
+              target.disabled = false;
+
+              // Make table
+              const table = document.getElementById('table');
+              const thead = document.getElementById('thead');
+              const tbody = document.getElementById('tbody');
+
+              // Clean Table
+              while (tbody.firstChild) {
+               tbody.removeChild(tbody.firstChild);
+              }
+
+              for (let i = 0; i < response.table_key.length; i++) {
+                const tbodyRow = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.textContent = response.table_key[i];
+                const td2 = document.createElement('td');
+                td2.textContent = response.table_value[i];
+                tbodyRow.appendChild(td1);
+                tbodyRow.appendChild(td2);
+                tbody.appendChild(tbodyRow);
+              }
+
+          },
+          error: function(request, status, error){
+              alert('통신 실패')
+              alert(error);
+              target.disabled = false;
+          }
+      })
+  }
+</script>
+<script>
+  function chageLangSelect(){
+      var langSelect = document.getElementById("selectbox");
+      var selectText = langSelect.options[langSelect.selectedIndex].text;
+      var postdata = {'type':'report_selectbox', 'value' : selectText}
+      $.ajax({
+        type: 'POST',
+        url: '/ajax',
+        data : JSON.stringify(postdata),
+        dataType : 'JSON',
+        contentType: "application/json",
+        success: function (response) {
+            console.log(response.data)
+            var parent = document.querySelector("#fieldset")
+            parent.innerHTML = "";
+            for(i = 0; i < response.data.length; i++){
+              var option = document.createElement('option')
+              option.setAttribute('name', response.data[i]);
+              option.setAttribute('value', response.data[i]);
+              option.innerText = response.data[i];
+              parent.appendChild(option);
+            }
+        },
+        error: function(request, status, error){
+            alert('통신 실패')
+            alert(error);
+        }
+    })
+  }
+  function select_item(){
+    var langSelect = document.getElementById("fieldset");
+    var selectText = langSelect.options[langSelect.selectedIndex].text;
+    var parent = document.querySelector("#selected_item")
+    var option = document.createElement('option')
+    option.setAttribute('name', selectText);
+    option.setAttribute('value', selectText);
+    option.setAttribute('selected', 'selected');
+    option.innerText = selectText;
+    parent.appendChild(option);
+  }
+  function select_company(){
+    var langSelect = document.getElementById("companybox");
+    var selectText = langSelect.options[langSelect.selectedIndex].text;
+    var parent = document.querySelector("#selected_company")
+    var option = document.createElement('option')
+    option.setAttribute('name', selectText);
+    option.setAttribute('value', selectText);
+    option.setAttribute('selected', 'selected');
+    option.innerText = selectText;
+    parent.appendChild(option);
+  }
+  function reset(){
+    const form = document.getElementById('selected_item');
+    // Clean Table
+    while (form.firstChild) {
+      form.removeChild(form.firstChild);
+    }
+
+  }
+  </script>
+
+<script src="{{ config.ASSETS_ROOT }}/js/plugins/chartjs.min.js"></script>
+<script>
+  var ctx1 = document.getElementById("chart-line").getContext("2d");
+  var myChart = new Chart(ctx1, {
+    type: "bar",
+    data: {
+      labels: [],
+      datasets: [
+          {
+            data: [],
+          },
+      ],
+    },
+    options: {
+      indexAxis: 'y',
+      // Elements options apply to all of the options unless overridden in a dataset
+      // In this case, we are setting the border of each horizontal bar to be 2px wide
+      elements: {
+        bar: {
+          borderWidth: 2,
+        }
+      },
+      responsive: true,
+      plugins: {
+        legend :{
+          display: false
+        },
+        title: {
+          display: true,
+          text: '일자 별 품목 판매 통합 현황'
+        }
+      }
+    },
+  });
+</script>
+{% endblock javascripts %}
