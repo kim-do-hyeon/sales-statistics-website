@@ -29,6 +29,7 @@ def get_excel_files() :
         temp = pd.read_excel("apps/upload_excel/" + i)
         df = pd.concat([df, temp], ignore_index=True)
     df["제품명 업데이트"] = df.apply(lambda x: combine_2rd_columns(x['제품(명)'], x['옵션1']), axis=1)
+    df['공급합계'] = df['공급합계'].astype(int)
     return df
 
 # 매출액
@@ -54,8 +55,8 @@ def top_1_product(df) :
 
 # Top 매출 채널
 def top_company(df) :
-    data = df.groupby('업체분류').sum()['공급합계'].sort_values(ascending=False)[:1]
-    count = df.groupby('업체분류').count()['공급합계'].sort_values(ascending=False)[:1]
+    data = df.groupby('업체분류')['공급합계'].sum().sort_values(ascending=False)[:1]
+    count = df.groupby('업체분류')['공급합계'].count().sort_values(ascending=False)[:1]
     data = (data.to_dict())
     key = (list(data.keys())[0])
     value = int(list(data.values())[0])
