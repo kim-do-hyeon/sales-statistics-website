@@ -24,48 +24,50 @@
               <h6>상세 조회 설정</h6>
             </div>
             <div class="row">
-              <!-- <form class="form-group d-flex" method="POST" action="/sales_report_by_date" > -->
-                <div class="col-md-2">
-                  <label>일자선택</label><br>
-                  <label>시작</label><input type="date" id="start" name="start"/><br>
-                  <label>종료</label><input type="date" id="end" name="end"/><br>
-                </div>
-                <div class="col-md-1">
-                  <label>회사</label><br>
-                  <select id="companybox" name="companybox" size="10" multiple ondblclick="select_company()">
-                    {% for i in companys %}
-                    <option value="{{i}}">{{i}}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <label>구분</label><br>
-                  <select id="selectbox"" name="selectbox" size="10" onchange="chageLangSelect()">
-                    {% for i in product_type %}
-                      <option>{{i}}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label>제품명</label><br>
-                  <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
-                  </select>
-                </div>
-                <div class="col-md-1">
-                  <label>선택 회사</label><br>
-                  <select id="selected_company"" name="selected_company" size="10" multiple>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label>선택 제품</label><br>
-                  <select id="selected_item"" name="selected_item" size="10" multiple>
-                  </select>
-                </div>
-                <div class="col-md-2">
-                  <label>조회</label><br>
-                  <button id="button" class="btn btn-warning mb-0" onclick="ajax_grpah()">분석</button>
-                </div>
-              <!-- </form> -->
+              <div class="col-md-2">
+                <label>일자선택</label><br>
+                <label>시작</label><input class="form-control" type="date" id="start" name="start"/><br>
+                <label>종료</label><input class="form-control" type="date" id="end" name="end"/><br>
+              </div>
+              <div class="col-md-1">
+                <label>회사</label><br>
+                <select id="companybox" name="companybox" size="10" multiple ondblclick="select_company()">
+                  {% for i in companys %}
+                  <option value="{{i}}">{{i}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label>구분</label><br>
+                <select id="selectbox"" name="selectbox" size="10" onchange="chageLangSelect()">
+                  {% for i in product_type %}
+                    <option>{{i}}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>제품명</label><br>
+                <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
+                </select>
+              </div>
+              <div class="col-md-1">
+                <label>선택 회사</label><br>
+                <select id="selected_company"" name="selected_company" size="10" multiple>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label>선택 제품</label><br>
+                <select id="selected_item"" name="selected_item" size="10" multiple>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <button id="button" class="btn btn-warning mb-0" style="width: 100%" onclick="ajax_grpah()">분석</button>
+              </div>
+              <div class="col-md-6">
+                <button id="reset" class="btn btn-primary mb-0" style="width: 100%" onclick="reset()">초기화</button>
+              </div>
             </div>
           </div>
         </div>
@@ -235,6 +237,14 @@
     option.setAttribute('selected', 'selected');
     option.innerText = selectText;
     parent.appendChild(option);
+  }
+  function reset(){
+    const form = document.getElementById('selected_item');
+    // Clean Table
+    while (form.firstChild) {
+      form.removeChild(form.firstChild);
+    }
+
   }
   </script>
 
