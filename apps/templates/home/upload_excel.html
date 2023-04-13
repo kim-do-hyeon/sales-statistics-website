@@ -26,7 +26,7 @@
             <div class="card-body px-0 pt-0 pb-2">
               <div style="padding: 20px;">
                 <form action = "/upload_excel" method = "POST" enctype = "multipart/form-data">
-                    <input class="btn bg-gradient-dark mb-0" name="file" id="file" type="file" />
+                    <input class="btn bg-gradient-dark mb-0" name="file[]" multiple="multiple" id="file" type="file" />
                     <button type="submit" class="btn bg-gradient-dark mb-0">업로드</button>
                 </form>
                 <button class="btn btn-warning mb-0" onclick="location.href='/delete_excel/all' " style="float: right;">일괄 삭제</button>
@@ -37,6 +37,8 @@
                     <tr class="align-middle text-center">
                       <th class="text-uppercase text-secondary font-weight-bolder opacity-7">파일명</th>
                       <th class="text-uppercase text-secondary font-weight-bolder opacity-7">적용 여부</th>
+                      <th class="text-uppercase text-secondary font-weight-bolder opacity-7">적용</th>
+                      <th class="text-uppercase text-secondary font-weight-bolder opacity-7">적용해제</th>
                       <th class="text-uppercase text-secondary font-weight-bolder opacity-7">삭제</th>
                     </tr>
                   </thead>
@@ -54,6 +56,12 @@
                         {% else %}
                           <p class="text-xs font-weight-bold mb-0">오류</p>
                         {% endif %}
+                      </td>
+                      <td class="align-middle text-center">
+                        <button class="btn btn-success" onclick="location.href='/apply_excel/apply/{{i.id}}'">적용</button>
+                      </td>
+                      <td class="align-middle text-center">
+                        <button class="btn btn-primary" onclick="location.href='/apply_excel/unapply/{{i.id}}'">적용해제</button>
                       </td>
                       <td class="align-middle text-center">
                         <button class="btn btn-warning" onclick="location.href='/delete_excel/{{i.id}}'">삭제</button>
