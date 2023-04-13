@@ -21,20 +21,53 @@
         <div class="col-12">
           <div class="card mb-4">
             <div class="card-header pb-0">
-              <h6>Authors table</h6>
+              <h6>상세 조회 설정</h6>
             </div>
             <div>
-              <h3>구분</h3>
-              <select id="selectbox"" name="selectbox" size="10" onchange="chageLangSelect()">
-                {% for i in product_type %}
-                  <option>{{i}}</option>
-                {% endfor %}
-              </select>
-              <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
-              </select>
-              <select id="selected_item"" name="selected_item" size="10">
-              </select>
-              <button>분석</button>
+              <div class="row">
+                  <form class="form-group d-flex" method="POST" action="/sales_report_by_date" >
+                    <div class="col-md-1">
+                      <label>일자선택</label><br>
+                      <label>시작</label><input type="date" id="start" name="start"/>
+                      <label>종료</label><input type="date" id="end" name="end"/><br>
+                    </div>
+                    <div class="col-md-1">
+                      <label>회사</label><br>
+                      <select id="companybox" name="companybox" size="10" multiple ondblclick="select_company()">
+                        {% for i in companys %}
+                        <option value="{{i}}">{{i}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label>구분</label><br>
+                      <select id="selectbox"" name="selectbox" size="10" onchange="chageLangSelect()">
+                        {% for i in product_type %}
+                          <option>{{i}}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label>제품명</label><br>
+                      <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
+                      </select>
+                    </div>
+                    <div class="col-md-1">
+                      <label>선택 회사</label><br>
+                      <select id="selected_company"" name="selected_company" size="10" multiple>
+                      </select>
+                    </div>
+                    <div class="col-md-3">
+                      <label>선택 제품</label><br>
+                      <select id="selected_item"" name="selected_item" size="10" multiple>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <label>조회</label><br>
+                      <button class="btn btn-warning mb-0">분석</button>
+                    </div>
+                  </form>
+              </div>
               <script>
                 function chageLangSelect(){
                     var langSelect = document.getElementById("selectbox");
@@ -71,11 +104,25 @@
                   var option = document.createElement('option')
                   option.setAttribute('name', selectText);
                   option.setAttribute('value', selectText);
+                  option.setAttribute('selected', 'selected');
+                  option.innerText = selectText;
+                  parent.appendChild(option);
+                }
+                function select_company(){
+                  var langSelect = document.getElementById("companybox");
+                  var selectText = langSelect.options[langSelect.selectedIndex].text;
+                  var parent = document.querySelector("#selected_company")
+                  var option = document.createElement('option')
+                  option.setAttribute('name', selectText);
+                  option.setAttribute('value', selectText);
+                  option.setAttribute('selected', 'selected');
                   option.innerText = selectText;
                   parent.appendChild(option);
                 }
                 </script>
             </div>
+          </div>
+          <div class="card mb-4">
             <div class="card-body px-0 pt-0 pb-2">
               <div class="table-responsive p-0">
                 <table class="table align-items-center mb-0">

@@ -93,7 +93,7 @@ def ajax() :
         elif data['type'] == 'report_selectbox' :
             value = data['value']
             product = Product_Details.query.filter_by(type=str(value)).all()
-            print(product)
+
             product_name = []
             for i in product :
                 if i.standard == "None" :
@@ -210,17 +210,27 @@ def analyze_sales() :
 '''
 @blueprint.route('/sales_report_by_date', methods=['GET', 'POST'])
 def sales_report_by_date() :
-    print("일자별 매출 리포트")
+    if request.method == 'GET' :
+        print("일자별 매출 리포트")
+        df = get_excel_files()
+        companys = list(set(df['업체분류']))
+        product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
+        product_type = []
+        for i in product_type_sql :
+            product_type.append(i[0])
+        product_type = list(set(product_type))
+        product_type = sorted(product_type)
 
-    product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
-    product_type = []
-    for i in product_type_sql :
-        product_type.append(i[0])
-    product_type = list(set(product_type))
-    product_type = sorted(product_type)
+        return render_template("home/sales_report_by_date.html",
+                            product_type = product_type,
+                            companys = companys)
+    elif request.method == 'POST' : 
+        selected_item = request.form.getlist("selected_item")
+        selected_company = request.form.getlist("selected_company")
+        print(selected_company)
+        print(selected_item)
+        return "A"
 
-    return render_template("home/sales_report_by_date.html",
-                           product_type = product_type)
 
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
