@@ -4,7 +4,6 @@ from apps import db
 import datetime
 from apps.home import blueprint
 from flask import render_template, request, flash, redirect, jsonify
-from flask_login import login_required
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data, Product_Data, Product_Details
@@ -13,11 +12,13 @@ from apps.home.management_products import *
 from apps.home.anlayze_product import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
-# @login_required
 def index():
     # Basic
     global df
     df = get_excel_files()
+    if len(df) == 0 :
+        flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+        return redirect("/upload_excel")
     top_1_product_data = top_1_product(df)
     top_company_data = top_company(df)
     total_sales_data = total_sales(df)
@@ -93,25 +94,19 @@ def ajax() :
         elif data['type'] == "report" :
             value = data['value']
             if value == "hourly" :
-                print("hourly")
                 d_k, d_v, d_c = hourly_sales(df)
                 for i in range(len(d_k)) :
                     d_k[i] = str(d_k[i]) + "시"
-
             elif value == "weekly" :
-                print("weekly")
                 d_k, d_v, d_c = days_sales(df)
                 d_k = d_k[-7:]
                 d_v = d_v[-7:]
             elif value == "monthly" :
-                print("monthly")
                 d_k, d_v, d_c = days_sales(df)
                 d_k = d_k[-30:]
                 d_v = d_v[-30:]
             elif value == "custom" :
-                print("custom")
                 d_k, d_v, d_c = specify_sales(df, data['start'], data['end'])
-            print(d_k, d_v, d_c)
 
             if value != "hourly" :
                 for i in range(len(d_k)) :
@@ -167,19 +162,13 @@ def ajax() :
             value = (list(data.values()))
             return jsonify(result = 'success', d_k =d_k, d_c = d_c, table_key = key, table_value = value)
         
-'''
-요약 일자를 선택합니다. 
-- 매출요약_매출액 / 매출건수 / 기간내 최고 매출 채널 / 기간내 최고 매출 품목을 나타냅니다. 
-- 품목별 매출 통계 그래프_ 일자별 매출(일자별 전체 매출 합) 을 꺾은선 그래프로 나타냅니다. 
-- 품목별 매출 데이터_선택한 기간내 일별 매출액과 결제자수를 표로 나타냅니다. (최대 30일간 조회) 
-- 판매채널을 선택합니다. (기본은 전체)   
-- 첨부된 제품리스트와 같이 정리됩니다. 
-'''
 @blueprint.route('/sales_analysis', methods=['GET', 'POST'])
-# @login_required
 def sales_analysis() :
     if request.method == 'GET' :
         df = get_excel_files()
+        if len(df) == 0 :
+            flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+            return redirect("/upload_excel")
         top_1_product_data = top_1_product(df)
         top_company_data = top_company(df)
         total_sales_data = total_sales(df)
@@ -200,7 +189,6 @@ def sales_analysis() :
 
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
-        print(companys_sales_data_for_pi_chart)
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
                             total_count_data = total_count_data,
@@ -214,6 +202,9 @@ def sales_analysis() :
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
     elif request.method == 'POST' :
         df = get_excel_files()
+        if len(df) == 0 :
+            flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+            return redirect("/upload_excel")
         selected_companys = (request.form.getlist('company'))
         companys = list(set(df['업체분류']))
         if len(selected_companys) == 0 :
@@ -248,7 +239,6 @@ def sales_analysis() :
         
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
-        print(companys_sales_data_for_pi_chart)
 
 
         return render_template("home/sales_analysis.html",
@@ -263,21 +253,13 @@ def sales_analysis() :
                             colors =  colors,
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
 
-'''
-일자별 매출 리포트 (품목별 일자별 매출 자료를 나타냅니다.) 
-- 리포트 조건을 선택합니다.　(기간 /품목 개별, 통합 선택) 
-*개별 선택시 품목별로 나눠 리포트가 작성되며 통합 선택시 선택한 품목들의 각 데이터의 합으로 리포트가 작성됩니다. 
-- 판매 채널을 선택 합니다. (전체_통합 / 일부 선택 가능)
-- 품목을 선택합니다. (전체 / 일부 선택 가능)
-* 구분 / 제품명 / 옵션 1 / 옵션 2 각 단계별 선택할 수 있도록 하며 상위 조건 선택만으로도 조회 가능하도록 합니다. 
-- 품목별 판매량 통계 그래프_ 선택한 조건의 매출(일자별 전체 매출 합)을 막대 그래프로 나타냅니다. (기간내 그래프는 일별, 주별, 월별로 선택할 수 있도록 합니다.) 
-- 품목별 판매량 데이터_ 선택한 기간내 품목별 일별 매출액을 표로 나타냅니다. (최대 30일간 조회) 
-'''
 @blueprint.route('/sales_report_by_date', methods=['GET', 'POST'])
 def sales_report_by_date() :
     if request.method == 'GET' :
-        print("일자별 매출 리포트")
         df = get_excel_files()
+        if len(df) == 0 :
+            flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+            return redirect("/upload_excel")
         companys = list(set(df['업체분류']))
         product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
         product_type = []
@@ -292,22 +274,14 @@ def sales_report_by_date() :
                             companys = companys,
                             d_k = d_k, d_v = d_v,
                             colors = colors)
-'''
-일자별 판매량 리포트 (품목별 일자별 판매량을 나타냅니다.) 
 
-- 리포트 조건을 선택합니다.　(기간 /품목 개별, 통합 선택) 
-- 판매 채널을 선택 합니다. (전체_통합 / 일부 선택 가능)
-- 품목을 선택합니다. (전체 / 일부 선택 가능)
-* 구분 / 제품명 / 옵션 1 / 옵션 2 각 단계별 선택할 수 있도록 하며 상위 조건 선택만으로도 조회 가능하도록 합니다. 
-  
-- 선택한 조건의 판매량(일자별 판매량 합)을 막대 그래프로 나타냅니다. (기간내 그래프는 일별, 주별, 월별로 선택할 수 있도록 합니다.) 
-- 선택한 기간내 품목별 일별 판매량을 표로 나타냅니다. (최대 30일간 조회) 
-'''
 @blueprint.route('/sales_volume_report_by_date', methods=['GET', 'POST'])
 def sales_volume_report_by_date() :
     if request.method == 'GET' :
-        print("일자별 판매량 리포트")
         df = get_excel_files()
+        if len(df) == 0 :
+            flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+            return redirect("/upload_excel")
         companys = list(set(df['업체분류']))
         product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
         product_type = []
@@ -324,24 +298,55 @@ def sales_volume_report_by_date() :
                             colors = colors)
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
-# @login_required
 def upload_excel() :
     if request.method == 'GET' :
         data = Excel_Data.query.all()
         return render_template('home/upload_excel.html', data = data)
     elif request.method == 'POST' :
-        file = request.files['file']
-        filename = secure_filename(file.filename)
-        file.save(os.path.join("apps/upload_excel", filename))
-        data = Excel_Data(filename = str(filename), active = 1)
-        db.session.add(data)
+        upload = request.files.getlist("file[]")
+        for f in upload :
+            filename = secure_filename(f.filename)
+            f.save(os.path.join("apps/upload_excel", filename))
+            data = Excel_Data(filename = str(filename), active = 0)
+            db.session.add(data)
         db.session.commit()
         flash("엑셀 파일이 등록되었습니다.")
         return redirect('/upload_excel')
 
+@blueprint.route('/apply_excel/<path:subpath>')
+def apply_excel(subpath) :
+    subpath = subpath.split("/")
+    if subpath[0] == "apply" :
+        data = Excel_Data.query.filter_by(id = subpath[1]).update(dict(active=1))
+        db.session.commit()
+        flash("엑셀 파일의 권한이 수정되었습니다.")
+        return redirect('/upload_excel')
+    elif subpath[0] == "unapply" :
+        data = Excel_Data.query.filter_by(id = subpath[1]).update(dict(active=0))
+        db.session.commit()
+        flash("엑셀 파일의 권한이 수정되었습니다.")
+        return redirect('/upload_excel')
+
+@blueprint.route('/delete_excel/<path:subpath>')
+def delete_excel(subpath) :
+    if subpath == 'all' :
+        data = Excel_Data.query.all()
+        for i in data :
+            db.session.delete(i)
+        db.session.commit()
+    else :
+        data = Excel_Data.query.filter_by(id = subpath).first()
+        db.session.delete(data)
+        db.session.commit()
+    flash("파일이 삭제되었습니다.")
+    return redirect('/upload_excel')
+
 @blueprint.route('/management_product', methods=['GET', 'POST'])
 def management_proudct() :
     df = get_upload_files()
+    if len(df) == 0 :
+        flash("등록된 제품이 없습니다. 제품 등록을 먼저 해주세요.")
+        return redirect("/upload_product") 
     data = get_products(df)
     product_data = Product_Details.query.all()
     return render_template("home/management_product.html",
@@ -376,7 +381,6 @@ def product(subpath) :
             elif subpath[1] == "custom" :
                 key = subpath[2]
                 id = int(subpath[3])
-                print(key, id)
                 df = get_upload_files()
                 data = get_products(df)
                 custom_data = (data[key][id])
@@ -401,7 +405,6 @@ def product(subpath) :
                 return redirect('/management_product')
 
 @blueprint.route('/upload_product', methods=['GET', 'POST'])
-# @login_required
 def upload_product() :
     if request.method == 'GET' :
         data = Product_Data.query.all()
@@ -415,9 +418,8 @@ def upload_product() :
         db.session.commit()
         flash("엑셀 파일이 등록되었습니다.")
         return redirect('/upload_product')
-    
+
 @blueprint.route('/delete_product/<path:subpath>')
-# @login_required
 def delete_product(subpath) :
     if subpath == 'all' :
         data = Product_Data.query.all()
@@ -431,23 +433,7 @@ def delete_product(subpath) :
     flash("파일이 삭제되었습니다.")
     return redirect('/upload_product')
 
-@blueprint.route('/delete_excel/<path:subpath>')
-# @login_required
-def delete_excel(subpath) :
-    if subpath == 'all' :
-        data = Excel_Data.query.all()
-        for i in data :
-            db.session.delete(i)
-        db.session.commit()
-    else :
-        data = Excel_Data.query.filter_by(id = subpath).first()
-        db.session.delete(data)
-        db.session.commit()
-    flash("파일이 삭제되었습니다.")
-    return redirect('/upload_excel')
-
 @blueprint.route('/<template>')
-# @login_required
 def route_template(template):
     try:
         if not template.endswith('.html'):

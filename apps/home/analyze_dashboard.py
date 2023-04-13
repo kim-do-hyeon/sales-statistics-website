@@ -18,6 +18,9 @@ def extract_day(date) :
 # 등록된 데이터 파일 불러오기
 def get_excel_files() :
     datas = Excel_Data.query.filter_by(active=1).all()
+    if len(datas) == 0 :
+        df = pd.DataFrame()
+        return df
     excel_file_names = []
     for i in datas :
         excel_file_names.append(i.filename)

@@ -12,6 +12,9 @@ def combine_2rd_columns(col_1, col_2):
 # 등록된 데이터 파일 불러오기
 def get_upload_files() :
     datas = Product_Data.query.filter_by(active=1).all()
+    if len(datas) == 0 :
+        df = pd.DataFrame()
+        return df
     excel_file_names = []
     for i in datas :
         excel_file_names.append(i.filename)
