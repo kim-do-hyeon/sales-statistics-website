@@ -107,16 +107,14 @@
               </div>
               <div class="col" style="float: right;">
                 <div style="display: inline-block;">
-                  <button class="btn bg-gradient-dark" onclick="location.href='/index/hourly_report'">시간별 매출</button>
-                  <button class="btn bg-gradient-dark" onclick="location.href='/index/weekly_report'">7일</button>
-                  <button class="btn bg-gradient-dark" onclick="location.href='/index/monthly_report'">30일</button>
+                  <button class="btn bg-gradient-dark" onclick="ajax_table('hourly')">시간별 매출</button>
+                  <button class="btn bg-gradient-dark" onclick="ajax_table('weekly')">7일</button>
+                  <button class="btn bg-gradient-dark" onclick="ajax_table('monthly')">30일</button>
                 </div>
                 <div style="display: inline-block;">
-                  <form action="/index/setting_report" method="POST">
-                    <input type="date" id="start" name="start"/>
-                    <input type="date" id="end" name="end"/>
-                    <button type="submit" class="btn bg-gradient-dark">직접입력</button>
-                  </form>
+                  <input type="date" id="start_report" name="start"/>
+                  <input type="date" id="end_report" name="end"/>
+                  <button type="submit" class="btn bg-gradient-dark" onclick="ajax_table('custom')">직접입력</button>
                 </div>
               </div>
             </div>
@@ -129,7 +127,7 @@
                     <td>결제 금액</td>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody" style="text-align: center;">
                   {% for i in range(report_keys | length)%}
                   <tr>
                     <td class="w-30">
@@ -197,6 +195,57 @@
                 myChart.data.labels = response.label
                 myChart.data.datasets[0].data = response.value
                 myChart.update();
+            },
+            error: function(request, status, error){
+                alert('통신 실패')
+                alert(error);
+            }
+        })
+    }
+    function ajax_table(A) {
+        if(A == 'custom'){
+          var start = document.getElementById("start_report").value
+          var end = document.getElementById("end_report").value
+          if(start == ""){
+            alert("시작일을 지정해 주세요.");
+            return
+          }
+          if(end == ""){
+            alert("종료일을 지정해 주세요.");
+            return
+          }
+          var postdata = {'type':'report', 'value' : A, 'start' : start, 'end' : end}
+        }else{
+          var postdata = {'type':'report', 'value' : A}
+        }
+
+        $.ajax({
+            type: 'POST',
+            url: '/ajax',
+            data : JSON.stringify(postdata),
+            dataType : 'JSON',
+            contentType: "application/json",
+            success: function (response) {
+              // Make table
+              const tbody = document.getElementById('tbody');
+
+              // Clean Table
+              while (tbody.firstChild) {
+               tbody.removeChild(tbody.firstChild);
+              }
+              for (let i = 0; i < response.table_key.length; i++) {
+                const tbodyRow = document.createElement('tr');
+                const td1 = document.createElement('td');
+                td1.textContent = response.table_key[i];
+                const td2 = document.createElement('td');
+                td2.textContent = response.table_count[i];
+                const td3 = document.createElement('td');
+                td3.textContent = response.table_value[i];
+                tbodyRow.appendChild(td1);
+                tbodyRow.appendChild(td2);
+                tbodyRow.appendChild(td3);
+                tbody.appendChild(tbodyRow);
+              }
             },
             error: function(request, status, error){
                 alert('통신 실패')

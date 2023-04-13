@@ -89,12 +89,46 @@ def ajax() :
             graph_value = []
             for i in d_v :
                 graph_value.append(i)
-
             return jsonify(result='success', label=graph_label, value=graph_value)
+        elif data['type'] == "report" :
+            value = data['value']
+            if value == "hourly" :
+                print("hourly")
+                d_k, d_v, d_c = hourly_sales(df)
+                for i in range(len(d_k)) :
+                    d_k[i] = str(d_k[i]) + "시"
+
+            elif value == "weekly" :
+                print("weekly")
+                d_k, d_v, d_c = days_sales(df)
+                d_k = d_k[-7:]
+                d_v = d_v[-7:]
+            elif value == "monthly" :
+                print("monthly")
+                d_k, d_v, d_c = days_sales(df)
+                d_k = d_k[-30:]
+                d_v = d_v[-30:]
+            elif value == "custom" :
+                print("custom")
+                d_k, d_v, d_c = specify_sales(df, data['start'], data['end'])
+            print(d_k, d_v, d_c)
+
+            if value != "hourly" :
+                for i in range(len(d_k)) :
+                    year = int(d_k[i][:4])
+                    month = int(d_k[i][4:6])
+                    day = int(d_k[i][6:])
+                    date_obj = datetime.date(year, month, day)
+                    d_k[i] = (date_obj.strftime("%Y년 %m월 %d일"))
+            for i in range(len(d_v)) :
+                d_v[i] = str(format(int(d_v[i]), ',')) + "원"
+            for i in range(len(d_c)) :
+                d_c[i] = str(d_c[i]) + "건"
+            
+            return jsonify(result='success', table_key = d_k, table_value = d_v, table_count = d_c)
         elif data['type'] == 'report_selectbox' :
             value = data['value']
             product = Product_Details.query.filter_by(type=str(value)).all()
-
             product_name = []
             for i in product :
                 if i.standard == "None" :
@@ -112,8 +146,6 @@ def ajax() :
             d_k, d_v, d_c = days_sales(processed_df)
             for i in range(len(d_v)) :
                 d_v[i] = str(int(d_v[i]))
-            print(d_k, d_v)
-
             data = processed_df.groupby('제품명 업데이트').sum()['공급합계'].sort_values(ascending=False)
             data = (data.to_dict())
             key = (list(data.keys()))
@@ -129,14 +161,11 @@ def ajax() :
             d_k, d_v, d_c = days_sales(processed_df)
             for i in range(len(d_c)) :
                 d_c[i] = str(int(d_c[i]))
-            print(d_k, d_c)
-
             data = processed_df.groupby('제품명 업데이트').sum()['수량'].sort_values(ascending=False)
             data = (data.to_dict())
             key = (list(data.keys()))
             value = (list(data.values()))
             return jsonify(result = 'success', d_k =d_k, d_c = d_c, table_key = key, table_value = value)
-
         
 '''
 요약 일자를 선택합니다. 
