@@ -90,6 +90,17 @@ def ajax() :
                 graph_value.append(i)
 
             return jsonify(result='success', label=graph_label, value=graph_value)
+        elif data['type'] == 'report_selectbox' :
+            value = data['value']
+            product = Product_Details.query.filter_by(type=str(value)).all()
+            print(product)
+            product_name = []
+            for i in product :
+                if i.standard == "None" :
+                    product_name.append(i.name)
+                else :
+                    product_name.append(i.name + "/" + i.standard)
+            return jsonify(result='success', data = product_name)
         
 '''
 요약 일자를 선택합니다. 
@@ -186,6 +197,31 @@ def analyze_sales() :
                             selected_companys = selected_companys,
                             colors =  colors,
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
+
+'''
+일자별 매출 리포트 (품목별 일자별 매출 자료를 나타냅니다.) 
+- 리포트 조건을 선택합니다.　(기간 /품목 개별, 통합 선택) 
+*개별 선택시 품목별로 나눠 리포트가 작성되며 통합 선택시 선택한 품목들의 각 데이터의 합으로 리포트가 작성됩니다. 
+- 판매 채널을 선택 합니다. (전체_통합 / 일부 선택 가능)
+- 품목을 선택합니다. (전체 / 일부 선택 가능)
+* 구분 / 제품명 / 옵션 1 / 옵션 2 각 단계별 선택할 수 있도록 하며 상위 조건 선택만으로도 조회 가능하도록 합니다. 
+- 품목별 판매량 통계 그래프_ 선택한 조건의 매출(일자별 전체 매출 합)을 막대 그래프로 나타냅니다. (기간내 그래프는 일별, 주별, 월별로 선택할 수 있도록 합니다.) 
+- 품목별 판매량 데이터_ 선택한 기간내 품목별 일별 매출액을 표로 나타냅니다. (최대 30일간 조회) 
+'''
+@blueprint.route('/sales_report_by_date', methods=['GET', 'POST'])
+def sales_report_by_date() :
+    print("일자별 매출 리포트")
+
+    product_type_sql = Product_Details.query.with_entities(Product_Details.type).all()
+    product_type = []
+    for i in product_type_sql :
+        product_type.append(i[0])
+    product_type = list(set(product_type))
+    product_type = sorted(product_type)
+
+    return render_template("home/sales_report_by_date.html",
+                           product_type = product_type)
+
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 # @login_required
