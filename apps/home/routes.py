@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data, Product_Data, Product_Details
 from apps.home.analyze_dashboard import *
 from apps.home.management_products import *
+from apps.home.anlayze_product import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
 # @login_required
@@ -227,8 +228,12 @@ def sales_report_by_date() :
     elif request.method == 'POST' : 
         selected_item = request.form.getlist("selected_item")
         selected_company = request.form.getlist("selected_company")
+        start = request.form['start']
+        end = request.form['end']
         print(selected_company)
         print(selected_item)
+        df = get_excel_files()
+        sepecify_product(df, selected_company, selected_item, start, end)
         return "A"
 
 
