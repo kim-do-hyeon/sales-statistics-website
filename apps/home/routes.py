@@ -143,9 +143,100 @@ def ajax() :
                 d_v[i] = str(int(d_v[i]))
             data = processed_df.groupby('제품명 업데이트').sum()['공급합계'].sort_values(ascending=False)
             data = (data.to_dict())
-            key = (list(data.keys()))
-            value = (list(data.values()))
-            return jsonify(result = 'success', d_k =d_k, d_v = d_v, table_key = key, table_value = value)
+            key_table = (list(data.keys()))
+            value_table = (list(data.values()))
+            
+            data1 = {}
+            for i in selected_company :
+                selected_company_df = processed_df[processed_df['업체분류'] == i]
+                for j in selected_item :
+                    selected_item_df = sales_report_by_date_function(selected_company_df, [j])
+                    a, b, c = days_sales(selected_item_df)
+                    try :
+                        data1[j].append([i, a, b])
+                    except :
+                        data1[j] = [[i, a, b]]            
+            product_info = {}
+
+            for product, company_info in data1.items():
+                companies = []
+                dates = []
+                sales = []
+                
+                # 각 회사(company) 목록과 날짜(date) 목록을 각각 구합니다.
+                for company in company_info:
+                    companies.append(company[0])
+                    dates.append(company[1])
+                    sales.append(company[2])
+
+                # 날짜(date)를 기준으로 오름차순 정렬합니다.
+                date_list = sorted(list(set([date for sublist in dates for date in sublist])))
+
+                # 각 회사가 사용한 금액(sales)을 구합니다.
+                company_sales = []
+                for i in range(len(companies)):
+                    company_sales.append([])
+                    for date in date_list:
+                        if date in dates[i]:
+                            company_sales[i].append(sales[i][dates[i].index(date)])
+                        else:
+                            company_sales[i].append(0)
+
+                product_info[product] = {
+                    'companies': companies,
+                    'date_list': date_list,
+                    'sales_list': company_sales
+                }
+            html_data = {}
+            for product, value in product_info.items():
+                html_data[product] = '<table class="table align-items-center mb-0"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(product)
+                for company in value['companies']:
+                    html_data[product] += '<th>{}</th>'.format(company)
+                html_data[product] += '<th>합계</th>'
+                html_data[product] += '</thead><tbody>'
+                # Tbody
+                # -> TR -> Td 날짜
+                total = 0
+                for i in range(len(value['date_list'])) :
+                    html_data[product] += '<tr><td>{}</td>'.format(value['date_list'][i])
+                    # -> 각 판매쳐별 데이터
+                    result = 0
+                    for company in range(len(value['companies'])) :
+                        if value['sales_list'][company][i] == 0 :
+                            html_data[product] += '<td>-</td>'
+                            result += 0
+                            total += 0
+                        else :
+                            html_data[product] += '<td>{}</td>'.format(value['sales_list'][company][i])
+                            result += value['sales_list'][company][i]
+                            total += value['sales_list'][company][i]
+                    html_data[product] += '<td>{}</td>'.format(result)
+                    html_data[product] += '</tr>'
+                # --> 각 판매쳐의 판매액 합
+                result = []
+                for company in range(len(value['companies'])) :
+                    result.append(sum(value['sales_list'][company]))
+                html_data[product] += '<tr><td>합계</td>'
+                for i in range(len(result)) :
+                    if result[i] == 0 :
+                        html_data[product] += '<td>-</td>'
+                    else : 
+                        html_data[product] += '<td>{}</td>'.format(result[i])
+                html_data[product] += '<td>{}</td>'.format(total)
+                html_data[product] += '</tr>'
+
+                html_data[product] += '</tbody></table>'
+            report_data_key = list(html_data.keys())
+            report_data_value = list(html_data.values())
+            return jsonify(result = 'success',
+                           d_k = d_k,
+                           d_v = d_v,
+                           table_key = key_table,
+                           table_value = value_table,
+                           report_data_key = report_data_key,
+                           report_data_value = report_data_value)
+        
+
         elif data['type'] == 'sales_volume_report_by_date' :
             selected_company = (data['companys'])
             selected_item = data['selected_products']
@@ -159,8 +250,97 @@ def ajax() :
             data = processed_df.groupby('제품명 업데이트').sum()['수량'].sort_values(ascending=False)
             data = (data.to_dict())
             key = (list(data.keys()))
-            value = (list(data.values()))
-            return jsonify(result = 'success', d_k =d_k, d_c = d_c, table_key = key, table_value = value)
+            value1 = (list(data.values()))
+
+            data1 = {}
+            for i in selected_company :
+                selected_company_df = processed_df[processed_df['업체분류'] == i]
+                for j in selected_item :
+                    selected_item_df = sales_report_by_date_function(selected_company_df, [j])
+                    a, b, c = days_sales(selected_item_df)
+                    try :
+                        data1[j].append([i, a, c])
+                    except :
+                        data1[j] = [[i, a, c]]
+            
+            product_info = {}
+
+            for product, company_info in data1.items():
+                companies = []
+                dates = []
+                sales = []
+                
+                # 각 회사(company) 목록과 날짜(date) 목록을 각각 구합니다.
+                for company in company_info:
+                    companies.append(company[0])
+                    dates.append(company[1])
+                    sales.append(company[2])
+
+                # 날짜(date)를 기준으로 오름차순 정렬합니다.
+                date_list = sorted(list(set([date for sublist in dates for date in sublist])))
+
+                # 각 회사가 사용한 금액(sales)을 구합니다.
+                company_sales = []
+                for i in range(len(companies)):
+                    company_sales.append([])
+                    for date in date_list:
+                        if date in dates[i]:
+                            company_sales[i].append(sales[i][dates[i].index(date)])
+                        else:
+                            company_sales[i].append(0)
+
+                product_info[product] = {
+                    'companies': companies,
+                    'date_list': date_list,
+                    'sales_list': company_sales
+                }
+
+
+            html_data = {}
+            for product, value in product_info.items():
+                html_data[product] = '<table class="table align-items-center mb-0"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(product)
+                for company in value['companies']:
+                    html_data[product] += '<th>{}</th>'.format(company)
+                html_data[product] += '<th>합계</th>'
+                html_data[product] += '</thead><tbody>'
+                # Tbody
+                # -> TR -> Td 날짜
+                total = 0
+                for i in range(len(value['date_list'])) :
+                    html_data[product] += '<tr><td>{}</td>'.format(value['date_list'][i])
+                    # -> 각 판매쳐별 데이터
+                    result = 0
+                    for company in range(len(value['companies'])) :
+                        if value['sales_list'][company][i] == 0 :
+                            html_data[product] += '<td>-</td>'
+                            result += 0
+                            total += 0
+                        else :
+                            html_data[product] += '<td>{}</td>'.format(value['sales_list'][company][i])
+                            result += value['sales_list'][company][i]
+                            total += value['sales_list'][company][i]
+                    html_data[product] += '<td>{}</td>'.format(result)
+                    html_data[product] += '</tr>'
+                # --> 각 판매쳐의 판매액 합
+                result = []
+                for company in range(len(value['companies'])) :
+                    result.append(sum(value['sales_list'][company]))
+                html_data[product] += '<tr><td>합계</td>'
+                for i in range(len(result)) :
+                    if result[i] == 0 :
+                        html_data[product] += '<td>-</td>'
+                    else : 
+                        html_data[product] += '<td>{}</td>'.format(result[i])
+                html_data[product] += '<td>{}</td>'.format(total)
+                html_data[product] += '</tr>'
+
+                html_data[product] += '</tbody></table>'
+            report_data_key = list(html_data.keys())
+            report_data_value = list(html_data.values())
+
+            return jsonify(result = 'success', d_k = d_k, d_c = d_c, table_key = key, table_value = value1,
+                           report_data_key = report_data_key,
+                           report_data_value = report_data_value)
         
 @blueprint.route('/sales_analysis', methods=['GET', 'POST'])
 def sales_analysis() :
@@ -197,8 +377,6 @@ def sales_analysis() :
         report_sum = list(report_sum.values())
         report_count = list(df.groupby('매출 분석 리포트').count()['수량'].to_dict().values())
         
-        print(report_name, report_sum, report_count)
-        print(len(report_count), len(report_name), len(report_sum))
         product_data = []
         for i in product_sql :
             for j in range(len(report_name)) :
@@ -268,9 +446,6 @@ def sales_analysis() :
         report_name = list(report_sum.keys())
         report_sum = list(report_sum.values())
         report_count = list(df.groupby('매출 분석 리포트').count()['수량'].to_dict().values())
-        
-        print(report_name, report_sum, report_count)
-        print(len(report_count), len(report_name), len(report_sum))
         product_data = []
         for i in product_sql :
             for j in range(len(report_name)) :
