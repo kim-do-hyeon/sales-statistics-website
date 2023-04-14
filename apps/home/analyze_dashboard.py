@@ -9,6 +9,12 @@ def combine_2rd_columns(col_1, col_2):
         result += " " + str(col_2)
     return result
 
+def combine_3rd_columns(col_1, col_2):
+    result = col_1
+    if not pd.isna(col_2):
+        result += "//" + str(col_2)
+    return result
+
 def extract_month(date) :
     return str(date.year) + str(date.month).rjust(2, '0')
 
@@ -29,6 +35,8 @@ def get_excel_files() :
         temp = pd.read_excel("apps/upload_excel/" + i)
         df = pd.concat([df, temp], ignore_index=True)
     df["제품명 업데이트"] = df.apply(lambda x: combine_2rd_columns(x['제품(명)'], x['옵션1']), axis=1)
+    df["매출 분석 리포트"] = df.apply(lambda x: combine_2rd_columns(x['제품(명)'], x['옵션1']), axis=1)
+    df["매출 분석 리포트"] = df.apply(lambda x: combine_3rd_columns(x['매출 분석 리포트'], x['규격']), axis=1)
     df['공급합계'] = df['공급합계'].astype(int)
     return df
 

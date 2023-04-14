@@ -116,10 +116,11 @@
                   <input type="date" id="end_report" name="end"/>
                   <button type="submit" class="btn bg-gradient-dark" onclick="ajax_table('custom')">직접입력</button>
                 </div>
+                <button class="btn bg-gradient-dark" onclick="download_excel()">엑셀 다운로드</button>
               </div>
             </div>
             <div class="table-responsive">
-              <table class="table align-items-center ">
+              <table class="table align-items-center" id="mytable">
                 <thead>
                   <tr class="align-middle text-center">
                     <td>날짜</td>
@@ -336,6 +337,12 @@
         },
       },
     });
+  </script>
+  <script>
+    function download_excel() {
+      var wb = XLSX.utils.table_to_book(document.getElementById('mytable'), {sheet:"Sheet1",raw:true});
+      XLSX.writeFile(wb, ('excel.xlsx'));
+    }
   </script>
 
 {% endblock javascripts %}

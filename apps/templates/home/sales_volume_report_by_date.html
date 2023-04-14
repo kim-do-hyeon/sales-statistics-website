@@ -74,7 +74,7 @@
       </div>
 
       <div class="row">
-        <div class="col-6">
+        <div class="col-4">
           <div class="card mb-4">
             <div class="card-body p-3">
               <div class="card-header pb-0">
@@ -88,7 +88,7 @@
             </div>
           </div>
         </div>
-        <div class="col-6">
+        <div class="col-8">
           <div class="card mb-4">
             <div class="card-body p-3">
               <div class="card-header pb-0">
@@ -104,6 +104,8 @@
               <table>
             </div>
           </div>
+        </div>
+        <div class="row" id="report_data">
         </div>
       </div>
       {% include "includes/footer.html" %}
@@ -177,6 +179,11 @@
                 tbodyRow.appendChild(td2);
                 tbody.appendChild(tbodyRow);
               }
+
+              const report_data = document.getElementById("report_data");
+              report_data.innerHTML = response.report_data_value;
+              console.log(response.report_data);
+
 
           },
           error: function(request, status, error){
@@ -282,5 +289,12 @@
       }
     },
   });
+</script>
+<script>
+  function download_excel(A) {
+    var wb = XLSX.utils.table_to_book(document.getElementById(A), {sheet:"Sheet1",raw:true});
+    var B = String(A).replace("mytable_", "");
+    XLSX.writeFile(wb, (B + '.xlsx'));
+  }
 </script>
 {% endblock javascripts %}
