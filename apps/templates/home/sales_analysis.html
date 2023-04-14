@@ -115,6 +115,39 @@
             </div>
           </div>
         </div>
+        <div class="col-8">
+          <div class="card mb-4">
+            <div class="card-body p-3">
+              <div class="card-header pb-0">
+                <h6>매출 분석 리스트</h6>
+              </div>
+              <table id="table" class="table align-items-center mb-0">
+                <thead id="thead">
+                  <th>구분</th>
+                  <th>제품명</th>
+                  <th>규격</th>
+                  <th>수량</th>
+                  <th>매출액</th>
+                </thead>
+                <tbody id="tbody">
+                  {% for i in product_data %}
+                    <tr>
+                      <td>{{i[0]}}</td>
+                      <td>{{i[1]}}</td>
+                      {% if i[2] != "None" %}
+                        <td>{{i[2]}}</td>
+                      {% else %}
+                        <td></td>
+                      {% endif %}
+                      <td>{{i[3]}}</td>
+                      <td>{{i[4]}}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              <table>
+            </div>
+          </div>
+        </div>
       </div>
 
 

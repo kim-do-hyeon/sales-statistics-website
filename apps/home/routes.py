@@ -189,6 +189,27 @@ def sales_analysis() :
 
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
+
+        # 매출 분석 - 표
+        product_sql = Product_Details.query.all()
+        report_sum = df.groupby('매출 분석 리포트').sum()['공급합계'].to_dict()
+        report_name = list(report_sum.keys())
+        report_sum = list(report_sum.values())
+        report_count = list(df.groupby('매출 분석 리포트').count()['수량'].to_dict().values())
+        
+        print(report_name, report_sum, report_count)
+        print(len(report_count), len(report_name), len(report_sum))
+        product_data = []
+        for i in product_sql :
+            for j in range(len(report_name)) :
+                temp = report_name[j].split("//")
+                if len(temp) == 1 :
+                    if i.name == temp[0] :
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+                else :
+                    if i.name == temp[0] and i.standard == temp[1] :
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+        product_data = sorted(product_data, key = lambda x: x[1])
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
                             total_count_data = total_count_data,
@@ -199,7 +220,8 @@ def sales_analysis() :
                             company = companys,
                             selected_companys = companys,
                             colors =  colors,
-                            companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
+                            companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart,
+                            product_data = product_data)
     elif request.method == 'POST' :
         df = get_excel_files()
         if len(df) == 0 :
@@ -240,6 +262,26 @@ def sales_analysis() :
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
 
+        # 매출 분석 - 표
+        product_sql = Product_Details.query.all()
+        report_sum = df.groupby('매출 분석 리포트').sum()['공급합계'].to_dict()
+        report_name = list(report_sum.keys())
+        report_sum = list(report_sum.values())
+        report_count = list(df.groupby('매출 분석 리포트').count()['수량'].to_dict().values())
+        
+        print(report_name, report_sum, report_count)
+        print(len(report_count), len(report_name), len(report_sum))
+        product_data = []
+        for i in product_sql :
+            for j in range(len(report_name)) :
+                temp = report_name[j].split("//")
+                if len(temp) == 1 :
+                    if i.name == temp[0] :
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+                else :
+                    if i.name == temp[0] and i.standard == temp[1] :
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+        product_data = sorted(product_data, key = lambda x: x[1])
 
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
@@ -251,7 +293,8 @@ def sales_analysis() :
                             company = companys,
                             selected_companys = selected_companys,
                             colors =  colors,
-                            companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart)
+                            companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart,
+                            product_data = product_data)
 
 @blueprint.route('/sales_report_by_date', methods=['GET', 'POST'])
 def sales_report_by_date() :
