@@ -145,7 +145,6 @@ def ajax() :
             data = (data.to_dict())
             key_table = (list(data.keys()))
             value_table = (list(data.values()))
-            
             data1 = {}
             for i in selected_company :
                 selected_company_df = processed_df[processed_df['업체분류'] == i]
@@ -157,22 +156,15 @@ def ajax() :
                     except :
                         data1[j] = [[i, a, b]]            
             product_info = {}
-
             for product, company_info in data1.items():
                 companies = []
                 dates = []
                 sales = []
-                
-                # 각 회사(company) 목록과 날짜(date) 목록을 각각 구합니다.
                 for company in company_info:
                     companies.append(company[0])
                     dates.append(company[1])
                     sales.append(company[2])
-
-                # 날짜(date)를 기준으로 오름차순 정렬합니다.
                 date_list = sorted(list(set([date for sublist in dates for date in sublist])))
-
-                # 각 회사가 사용한 금액(sales)을 구합니다.
                 company_sales = []
                 for i in range(len(companies)):
                     company_sales.append([])
@@ -181,7 +173,6 @@ def ajax() :
                             company_sales[i].append(sales[i][dates[i].index(date)])
                         else:
                             company_sales[i].append(0)
-
                 product_info[product] = {
                     'companies': companies,
                     'date_list': date_list,
@@ -189,17 +180,16 @@ def ajax() :
                 }
             html_data = {}
             for product, value in product_info.items():
-                html_data[product] = '<table class="table align-items-center mb-0"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(product)
+                file_name = str(product).replace("/", "-")
+                html_data[product] = '<table class="table align-items-center mb-0" id="mytable_{}"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(file_name, product)
+                html_data[product] += '<button class="btn bg-gradient-dark" onclick="download_excel(\'mytable_{}\')" style="float: right;">엑셀 다운로드</button>'.format(file_name)
                 for company in value['companies']:
                     html_data[product] += '<th>{}</th>'.format(company)
                 html_data[product] += '<th>합계</th>'
                 html_data[product] += '</thead><tbody>'
-                # Tbody
-                # -> TR -> Td 날짜
                 total = 0
                 for i in range(len(value['date_list'])) :
                     html_data[product] += '<tr><td>{}</td>'.format(value['date_list'][i])
-                    # -> 각 판매쳐별 데이터
                     result = 0
                     for company in range(len(value['companies'])) :
                         if value['sales_list'][company][i] == 0 :
@@ -212,7 +202,6 @@ def ajax() :
                             total += value['sales_list'][company][i]
                     html_data[product] += '<td>{}</td>'.format(result)
                     html_data[product] += '</tr>'
-                # --> 각 판매쳐의 판매액 합
                 result = []
                 for company in range(len(value['companies'])) :
                     result.append(sum(value['sales_list'][company]))
@@ -224,7 +213,6 @@ def ajax() :
                         html_data[product] += '<td>{}</td>'.format(result[i])
                 html_data[product] += '<td>{}</td>'.format(total)
                 html_data[product] += '</tr>'
-
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())
@@ -235,8 +223,6 @@ def ajax() :
                            table_value = value_table,
                            report_data_key = report_data_key,
                            report_data_value = report_data_value)
-        
-
         elif data['type'] == 'sales_volume_report_by_date' :
             selected_company = (data['companys'])
             selected_item = data['selected_products']
@@ -251,7 +237,6 @@ def ajax() :
             data = (data.to_dict())
             key = (list(data.keys()))
             value1 = (list(data.values()))
-
             data1 = {}
             for i in selected_company :
                 selected_company_df = processed_df[processed_df['업체분류'] == i]
@@ -262,24 +247,16 @@ def ajax() :
                         data1[j].append([i, a, c])
                     except :
                         data1[j] = [[i, a, c]]
-            
             product_info = {}
-
             for product, company_info in data1.items():
                 companies = []
                 dates = []
                 sales = []
-                
-                # 각 회사(company) 목록과 날짜(date) 목록을 각각 구합니다.
                 for company in company_info:
                     companies.append(company[0])
                     dates.append(company[1])
                     sales.append(company[2])
-
-                # 날짜(date)를 기준으로 오름차순 정렬합니다.
                 date_list = sorted(list(set([date for sublist in dates for date in sublist])))
-
-                # 각 회사가 사용한 금액(sales)을 구합니다.
                 company_sales = []
                 for i in range(len(companies)):
                     company_sales.append([])
@@ -288,27 +265,23 @@ def ajax() :
                             company_sales[i].append(sales[i][dates[i].index(date)])
                         else:
                             company_sales[i].append(0)
-
                 product_info[product] = {
                     'companies': companies,
                     'date_list': date_list,
                     'sales_list': company_sales
                 }
-
-
             html_data = {}
             for product, value in product_info.items():
-                html_data[product] = '<table class="table align-items-center mb-0"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(product)
+                file_name = str(product).replace("/", "-")
+                html_data[product] = '<table class="table align-items-center mb-0" id="mytable_{}"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(file_name, product)
+                html_data[product] += '<button class="btn bg-gradient-dark" onclick="download_excel(\'mytable_{}\')" style="float: right;">엑셀 다운로드</button>'.format(file_name)
                 for company in value['companies']:
                     html_data[product] += '<th>{}</th>'.format(company)
                 html_data[product] += '<th>합계</th>'
                 html_data[product] += '</thead><tbody>'
-                # Tbody
-                # -> TR -> Td 날짜
                 total = 0
                 for i in range(len(value['date_list'])) :
                     html_data[product] += '<tr><td>{}</td>'.format(value['date_list'][i])
-                    # -> 각 판매쳐별 데이터
                     result = 0
                     for company in range(len(value['companies'])) :
                         if value['sales_list'][company][i] == 0 :
@@ -321,7 +294,6 @@ def ajax() :
                             total += value['sales_list'][company][i]
                     html_data[product] += '<td>{}</td>'.format(result)
                     html_data[product] += '</tr>'
-                # --> 각 판매쳐의 판매액 합
                 result = []
                 for company in range(len(value['companies'])) :
                     result.append(sum(value['sales_list'][company]))
@@ -333,7 +305,6 @@ def ajax() :
                         html_data[product] += '<td>{}</td>'.format(result[i])
                 html_data[product] += '<td>{}</td>'.format(total)
                 html_data[product] += '</tr>'
-
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())

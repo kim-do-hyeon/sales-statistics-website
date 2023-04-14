@@ -288,4 +288,11 @@
     },
   });
 </script>
+<script>
+  function download_excel(A) {
+    var wb = XLSX.utils.table_to_book(document.getElementById(A), {sheet:"Sheet1",raw:true});
+    var B = String(A).replace("mytable_", "");
+    XLSX.writeFile(wb, (B + '.xlsx'));
+  }
+</script>
 {% endblock javascripts %}
