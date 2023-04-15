@@ -7,9 +7,8 @@ from flask import render_template, request, flash, redirect, jsonify
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data, Product_Data, Product_Details
-from apps.home.analyze_dashboard import *
+from apps.home.analyze import *
 from apps.home.management_products import *
-from apps.home.analyze_product import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
 def index():

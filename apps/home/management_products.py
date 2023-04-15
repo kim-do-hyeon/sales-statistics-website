@@ -1,6 +1,4 @@
 import pandas as pd
-from flask import request
-from apps import db
 from apps.authentication.models import Product_Data
 
 def combine_2rd_columns(col_1, col_2):
@@ -32,7 +30,6 @@ def get_products(df) :
     for i in range(len(df['제품명 업데이트'])) :
         try :
             data[df['구분'][i]].append([df['제품명 업데이트'][i], df['규격'][i], str(df['옵션 2'][i])])
-            # data[df['제품명 업데이트'][i]].append(df['규격'][i])
         except :
             data[df['구분'][i]] = ([[df['제품명 업데이트'][i], df['규격'][i], str(df['옵션 2'][i])]])
 
