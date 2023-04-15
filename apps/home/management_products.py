@@ -9,21 +9,25 @@ def combine_2rd_columns(col_1, col_2):
 
 # 등록된 데이터 파일 불러오기
 def get_upload_files() :
-    datas = Product_Data.query.filter_by(active=1).all()
-    if len(datas) == 0 :
+    try :
+        datas = Product_Data.query.filter_by(active=1).all()
+        if len(datas) == 0 :
+            df = pd.DataFrame()
+            return df
+        excel_file_names = []
+        for i in datas :
+            excel_file_names.append(i.filename)
+        df = pd.DataFrame()
+        for i in excel_file_names :
+            temp = pd.read_excel("apps/upload_product/" + i, sheet_name='제품리스트', skiprows=[0,1,2])
+            df = pd.concat([df, temp], ignore_index=True)
+        df["제품명 업데이트"] = df.apply(lambda x: combine_2rd_columns(x['제품명'], x['옵션 1']), axis=1)
+        df['구분'] = df['구분'].fillna(method='ffill')
+        df['규격'] = df['규격'].fillna("None")
+        return df
+    except :
         df = pd.DataFrame()
         return df
-    excel_file_names = []
-    for i in datas :
-        excel_file_names.append(i.filename)
-    df = pd.DataFrame()
-    for i in excel_file_names :
-        temp = pd.read_excel("apps/upload_product/" + i, sheet_name='제품리스트', skiprows=[0,1,2])
-        df = pd.concat([df, temp], ignore_index=True)
-    df["제품명 업데이트"] = df.apply(lambda x: combine_2rd_columns(x['제품명'], x['옵션 1']), axis=1)
-    df['구분'] = df['구분'].fillna(method='ffill')
-    df['규격'] = df['규격'].fillna("None")
-    return df
 
 def get_products(df) :
     data = {}

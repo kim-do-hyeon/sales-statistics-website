@@ -8,3 +8,4 @@ Version 1.2 Release Note
 2. Change the sort value of the sales analysis list
 3. Comma in thousands on sales
 4. Add Full Selection
+5. Add set order date or date option

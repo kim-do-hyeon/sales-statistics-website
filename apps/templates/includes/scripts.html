@@ -3,6 +3,37 @@
 <script src="{{ config.ASSETS_ROOT }}/js/plugins/perfect-scrollbar.min.js"></script>
 <script src="{{ config.ASSETS_ROOT }}/js/plugins/smooth-scrollbar.min.js"></script>
 <script lang="javascript" src="{{ config.ASSETS_ROOT }}/js/plugins/xlsx.full.min.js"></script>
+<script>
+    function set_option(type){
+        set_order_date = document.getElementById('set_order_date');
+        set_date = document.getElementById('set_date');
+        if(type == "date"){
+            set_date.classList.add('active');
+            set_order_date.classList.remove('active')
+            var postdata = {'type' : 'set_option', 'option' : 'date'}
+        }
+        else if(type == "order_date"){
+            set_order_date.classList.add('active');
+            set_date.classList.remove('active')
+            var postdata = {'type' : 'set_option', 'option' : 'order_date'}
+        }
 
+        $.ajax({
+            type: 'POST',
+            url: '/ajax',
+            data : JSON.stringify(postdata),
+            dataType : 'JSON',
+            contentType: "application/json",
+            success: function (response) {
+                alert("설정이 완료 되었습니다.")
+            },
+            error: function(request, status, error){
+                alert('통신 실패')
+                alert(error);
+            }
+        });
+
+    }
+</script>
 <!-- JQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>

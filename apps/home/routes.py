@@ -6,9 +6,23 @@ from apps.home import blueprint
 from flask import render_template, request, flash, redirect, jsonify
 from jinja2 import TemplateNotFound
 from werkzeug.utils import secure_filename
-from apps.authentication.models import Excel_Data, Product_Data, Product_Details
+from apps.authentication.models import Excel_Data, Product_Data, Product_Details, Option
 from apps.home.analyze import *
 from apps.home.management_products import *
+
+def set_options() :
+    try :
+        user_selected_option = Option.query.filter_by(id=1).first()
+        if user_selected_option.type == 'date' : 
+            temp = '일자'
+        elif user_selected_option.type == 'order_date' :
+            temp = '발주일자'
+        return temp
+    except :
+        data = Option(type = 'date')
+        db.session.add(data)
+        db.session.commit()
+        return "일자"
 
 @blueprint.route('/index', methods=['GET', 'POST'])
 def index():
@@ -18,6 +32,7 @@ def index():
     if len(df) == 0 :
         flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
         return redirect("/upload_excel")
+
     top_1_product_data = top_1_product(df)
     top_company_data = top_company(df)
     total_sales_data = total_sales(df)
@@ -55,7 +70,8 @@ def index():
                         report_values = days_sales_values,
                         report_counts = days_sales_counts,
                         graph_labels = graph_days_sales_keys,
-                        graph_datas = graph_days_sales_values
+                        graph_datas = graph_days_sales_values,
+                        date_option = set_options()
     )
 
 @blueprint.route("/ajax", methods=['POST', 'GET'])
@@ -138,6 +154,9 @@ def ajax() :
             start = (data['start'])
             end = (data['end'])
             df = get_excel_files()
+            if len(df) == 0 :
+                flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+                return redirect("/upload_excel")
             processed_df = sepecify_product(df, selected_company, selected_item, start, end)
             d_k, d_v, d_c = days_sales(processed_df)
             for i in range(len(d_v)) :
@@ -236,6 +255,9 @@ def ajax() :
             start = (data['start'])
             end = (data['end'])
             df = get_excel_files()
+            if len(df) == 0 :
+                flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
+                return redirect("/upload_excel")
             processed_df = sepecify_product(df, selected_company, selected_item, start, end)
             d_k, d_v, d_c = days_sales(processed_df)
             for i in range(len(d_c)) :
@@ -323,6 +345,26 @@ def ajax() :
             return jsonify(result = 'success', d_k = d_k, d_c = d_c, table_key = key, table_value = value1,
                            report_data_key = report_data_key,
                            report_data_value = report_data_value)
+        elif data['type'] == 'set_option' :
+            print(Option.query.all())
+            if data['option'] == 'date' :
+                try :
+                    Option.query.filter_by(id=1).update(dict(type='date'))
+                    db.session.commit()
+                except :
+                    data = Option(type = 'date')
+                    db.session.add(data)
+                    db.session.commit()
+            elif data['option'] == 'order_date' :
+                try :
+                    Option.query.filter_by(id=1).update(dict(type='order_date'))
+                    db.session.commit()
+                except :
+                    data = Option(type = 'order_date')
+                    db.session.add(data)
+                    db.session.commit()
+            return jsonify(result = 'success')
+
         
 @blueprint.route('/sales_analysis', methods=['GET', 'POST'])
 def sales_analysis() :
@@ -386,7 +428,8 @@ def sales_analysis() :
                             selected_companys = companys,
                             colors =  colors,
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart,
-                            product_data = product_data)
+                            product_data = product_data,
+                            date_option = set_options())
     elif request.method == 'POST' :
         df = get_excel_files()
         if len(df) == 0 :
@@ -456,7 +499,8 @@ def sales_analysis() :
                             selected_companys = selected_companys,
                             colors =  colors,
                             companys_sales_data_for_pi_chart = companys_sales_data_for_pi_chart,
-                            product_data = product_data)
+                            product_data = product_data,
+                            date_option = set_options())
 
 @blueprint.route('/sales_report_by_date', methods=['GET', 'POST'])
 def sales_report_by_date() :
@@ -478,7 +522,8 @@ def sales_report_by_date() :
                             product_type = product_type,
                             companys = companys,
                             d_k = d_k, d_v = d_v,
-                            colors = colors)
+                            colors = colors,
+                            date_option = set_options())
 
 @blueprint.route('/sales_volume_report_by_date', methods=['GET', 'POST'])
 def sales_volume_report_by_date() :
@@ -500,13 +545,15 @@ def sales_volume_report_by_date() :
                             product_type = product_type,
                             companys = companys,
                             d_k = d_k, d_v = d_v,
-                            colors = colors)
+                            colors = colors,
+                            date_option = set_options())
 
 @blueprint.route('/upload_excel', methods=['GET', 'POST'])
 def upload_excel() :
     if request.method == 'GET' :
         data = Excel_Data.query.all()
-        return render_template('home/upload_excel.html', data = data)
+        return render_template('home/upload_excel.html', data = data,
+                               date_option = set_options())
     elif request.method == 'POST' :
         upload = request.files.getlist("file[]")
         for f in upload :
@@ -556,7 +603,8 @@ def management_proudct() :
     product_data = Product_Details.query.all()
     return render_template("home/management_product.html",
                            data = data,
-                           product_data = product_data)
+                           product_data = product_data,
+                           date_option = set_options())
 
 @blueprint.route('/product/<path:subpath>', methods=['GET', 'POST'])
 def product(subpath) :
@@ -575,6 +623,9 @@ def product(subpath) :
         if subpath[0] == 'register' :
             if subpath[1] == "all" :
                 df = get_upload_files()
+                if len(df) == 0 :
+                    flash("등록된 제품이 없습니다. 제품 등록을 먼저 해주세요.")
+                    return redirect('/upload_product')
                 data = get_products(df)
                 for key, value in data.items() :
                     for i in value :
@@ -587,6 +638,9 @@ def product(subpath) :
                 key = subpath[2]
                 id = int(subpath[3])
                 df = get_upload_files()
+                if len(df) == 0 :
+                    flash("등록된 제품이 없습니다. 제품 등록을 먼저 해주세요.")
+                    return redirect('/upload_product')
                 data = get_products(df)
                 custom_data = (data[key][id])
                 data = Product_Details(type = str(key), name = custom_data[0], standard = custom_data[1], standard_secondary = custom_data[2])
@@ -613,7 +667,7 @@ def product(subpath) :
 def upload_product() :
     if request.method == 'GET' :
         data = Product_Data.query.all()
-        return render_template('home/upload_product.html', data = data)
+        return render_template('home/upload_product.html', data = data, date_option = set_options())
     elif request.method == 'POST' :
         file = request.files['file']
         filename = secure_filename(file.filename)
@@ -644,7 +698,7 @@ def route_template(template):
         if not template.endswith('.html'):
             template += '.html'
         segment = get_segment(request)
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, date_option = set_options())
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
