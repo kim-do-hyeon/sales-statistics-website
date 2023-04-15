@@ -36,6 +36,7 @@
                   <option value="{{i}}">{{i}}</option>
                   {% endfor %}
                 </select>
+                <button class="btn bg-gradient-dark" onclick="select_all('company')">전체선택</button>
               </div>
               <div class="col-md-2">
                 <label>구분</label><br>
@@ -49,6 +50,7 @@
                 <label>제품명</label><br>
                 <select id="fieldset"" name="fieldset" size="10" ondblclick="select_item()">
                 </select>
+                <button class="btn bg-gradient-dark" onclick="select_all('product')">전체선택</button>
               </div>
               <div class="col-md-1">
                 <label>선택 회사</label><br>
@@ -249,7 +251,35 @@
     while (form.firstChild) {
       form.removeChild(form.firstChild);
     }
-
+  }
+  function select_all(A){
+    if(A == 'company'){
+      var x = document.getElementById("companybox");
+      var parent = document.querySelector("#selected_company")
+      var i;
+      for (i = 0; i < x.length; i++) {
+        var selectText = x.options[i].value;
+        var option = document.createElement('option')
+        option.setAttribute('name', selectText);
+        option.setAttribute('value', selectText);
+        option.setAttribute('selected', 'selected');
+        option.innerText = selectText;
+        parent.appendChild(option);
+      }
+    }else if(A == 'product'){
+      var x = document.getElementById("fieldset");
+      var parent = document.querySelector("#selected_item")
+      var i;
+      for (i = 0; i < x.length; i++) {
+        var selectText = x.options[i].value;
+        var option = document.createElement('option')
+        option.setAttribute('name', selectText);
+        option.setAttribute('value', selectText);
+        option.setAttribute('selected', 'selected');
+        option.innerText = selectText;
+        parent.appendChild(option);
+      }
+    }
   }
   </script>
 

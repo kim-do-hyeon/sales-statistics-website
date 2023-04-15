@@ -38,6 +38,11 @@ class Product_Details(db.Model, UserMixin) :
     standard = db.Column(db.Text)
     standard_secondary = db.Column(db.Text)
 
+class Option(db.Model, UserMixin) :
+    __tablename__ = 'options'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.Text)
+
 @login_manager.user_loader
 def user_loader(id):
     return Users.query.filter_by(id=id).first()
