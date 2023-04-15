@@ -106,7 +106,7 @@ def specify_sales(df, start, end) :
     filtered_df = df.loc[mask]
     rev_by_day = filtered_df.set_index("일자").groupby(extract_day).sum()['공급합계']
     data = (rev_by_day.to_dict())
-    count = df.set_index("일자").groupby(extract_day).count()['공급합계']
+    count = filtered_df.set_index("일자").groupby(extract_day).count()['공급합계']
     count = (count.to_dict())
     count_value = (list(count.values()))
     return list(data.keys()), list(data.values()), count_value

@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 from apps.authentication.models import Excel_Data, Product_Data, Product_Details
 from apps.home.analyze_dashboard import *
 from apps.home.management_products import *
-from apps.home.anlayze_product import *
+from apps.home.analyze_product import *
 
 @blueprint.route('/index', methods=['GET', 'POST'])
 def index():
@@ -101,10 +101,12 @@ def ajax() :
                 d_k, d_v, d_c = days_sales(df)
                 d_k = d_k[-7:]
                 d_v = d_v[-7:]
+                d_c = d_c[-7:]
             elif value == "monthly" :
                 d_k, d_v, d_c = days_sales(df)
                 d_k = d_k[-30:]
                 d_v = d_v[-30:]
+                d_c = d_c[-30:]
             elif value == "custom" :
                 d_k, d_v, d_c = specify_sales(df, data['start'], data['end'])
 
@@ -132,7 +134,7 @@ def ajax() :
                     product_name.append(i.name + "/" + i.standard)
             return jsonify(result='success', data = product_name)
         elif data['type'] == 'sales_report_by_date' :
-            selected_company = (data['companys'])
+            selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
             start = (data['start'])
             end = (data['end'])
@@ -145,6 +147,8 @@ def ajax() :
             data = (data.to_dict())
             key_table = (list(data.keys()))
             value_table = (list(data.values()))
+            for i in range(len(value_table)) :
+                value_table[i] = format(int(value_table[i]), ",")
             data1 = {}
             for i in selected_company :
                 selected_company_df = processed_df[processed_df['업체분류'] == i]
@@ -197,10 +201,12 @@ def ajax() :
                             result += 0
                             total += 0
                         else :
-                            html_data[product] += '<td>{}</td>'.format(value['sales_list'][company][i])
+                            temp = format(int(value['sales_list'][company][i]), ",")
+                            html_data[product] += '<td>{}</td>'.format(temp)
                             result += value['sales_list'][company][i]
                             total += value['sales_list'][company][i]
-                    html_data[product] += '<td>{}</td>'.format(result)
+                    temp = format(int(result), ",")
+                    html_data[product] += '<td>{}</td>'.format(temp)
                     html_data[product] += '</tr>'
                 result = []
                 for company in range(len(value['companies'])) :
@@ -210,8 +216,10 @@ def ajax() :
                     if result[i] == 0 :
                         html_data[product] += '<td>-</td>'
                     else : 
-                        html_data[product] += '<td>{}</td>'.format(result[i])
-                html_data[product] += '<td>{}</td>'.format(total)
+                        temp = format(int(result[i]), ",")
+                        html_data[product] += '<td>{}</td>'.format(temp)
+                temp = format(int(total), ",")
+                html_data[product] += '<td>{}</td>'.format(temp)
                 html_data[product] += '</tr>'
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
@@ -224,7 +232,7 @@ def ajax() :
                            report_data_key = report_data_key,
                            report_data_value = report_data_value)
         elif data['type'] == 'sales_volume_report_by_date' :
-            selected_company = (data['companys'])
+            selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
             start = (data['start'])
             end = (data['end'])
@@ -233,7 +241,7 @@ def ajax() :
             d_k, d_v, d_c = days_sales(processed_df)
             for i in range(len(d_c)) :
                 d_c[i] = str(int(d_c[i]))
-            data = processed_df.groupby('제품명 업데이트').sum()['수량'].sort_values(ascending=False)
+            data = processed_df.groupby('제품명 업데이트').count()['수량'].sort_values(ascending=False)
             data = (data.to_dict())
             key = (list(data.keys()))
             value1 = (list(data.values()))
@@ -289,10 +297,12 @@ def ajax() :
                             result += 0
                             total += 0
                         else :
-                            html_data[product] += '<td>{}</td>'.format(value['sales_list'][company][i])
+                            temp = format(int(value['sales_list'][company][i]), ",")
+                            html_data[product] += '<td>{}</td>'.format(temp)
                             result += value['sales_list'][company][i]
                             total += value['sales_list'][company][i]
-                    html_data[product] += '<td>{}</td>'.format(result)
+                    result_format = format(int(result), ",")
+                    html_data[product] += '<td>{}</td>'.format(result_format)
                     html_data[product] += '</tr>'
                 result = []
                 for company in range(len(value['companies'])) :
@@ -302,8 +312,10 @@ def ajax() :
                     if result[i] == 0 :
                         html_data[product] += '<td>-</td>'
                     else : 
-                        html_data[product] += '<td>{}</td>'.format(result[i])
-                html_data[product] += '<td>{}</td>'.format(total)
+                        temp = format(int(result[i]), ",")
+                        html_data[product] += '<td>{}</td>'.format(temp)
+                temp = format(int(total), ",")
+                html_data[product] += '<td>{}</td>'.format(temp)
                 html_data[product] += '</tr>'
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
@@ -354,11 +366,16 @@ def sales_analysis() :
                 temp = report_name[j].split("//")
                 if len(temp) == 1 :
                     if i.name == temp[0] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
                 else :
                     if i.name == temp[0] and i.standard == temp[1] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
-        product_data = sorted(product_data, key = lambda x: x[1])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
+        product_type = ["묘목", "깨비상토", "피트모스", "펄라이트", "화분", "블루마스터", "코코화이버",
+                        "프로스트킵", "재노탄", "로도비트", "제초매트", "차압예냉기", "블루베리용기",
+                        "종이상자", "스트로폼 박스", "용기 스티커", "기타", "세척마사", "질석",
+                        "난석", "바크", "점적관수 4구세트", "점적관수 부속품", "관수자재"]
+        product_data = sorted(product_data, key = lambda x: product_type)
+        print(product_data)
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
                             total_count_data = total_count_data,
