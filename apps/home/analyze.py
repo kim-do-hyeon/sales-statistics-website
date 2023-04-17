@@ -97,6 +97,17 @@ def days_sales(df) :
     count_value = (list(count.values()))
     return list(data.keys()), list(data.values()), count_value
 
+# 수량
+def days_sales_sales_volume(df) :
+    option = set_options()
+    df[option] = pd.to_datetime(df[option])
+    rev_by_day = df.set_index(option).groupby(extract_day).sum()['공급합계']
+    data = (rev_by_day.to_dict())
+    count = df.set_index(option).groupby(extract_day).sum()['수량']
+    count = (count.to_dict())
+    count_value = (list(count.values()))
+    return list(data.keys()), list(data.values()), count_value
+
 # 월별 매출
 def monthly_sales(df) :
     option = set_options()

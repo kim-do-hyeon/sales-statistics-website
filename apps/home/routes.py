@@ -259,10 +259,10 @@ def ajax() :
                 flash("등록된 엑셀파일이 없습니다. 등록을 먼저 해주세요.")
                 return redirect("/upload_excel")
             processed_df = sepecify_product(df, selected_company, selected_item, start, end)
-            d_k, d_v, d_c = days_sales(processed_df)
+            d_k, d_v, d_c = days_sales_sales_volume(processed_df)
             for i in range(len(d_c)) :
                 d_c[i] = str(int(d_c[i]))
-            data = processed_df.groupby('제품명 업데이트').count()['수량'].sort_values(ascending=False)
+            data = processed_df.groupby('제품명 업데이트').sum()['수량'].sort_values(ascending=False)
             data = (data.to_dict())
             key = (list(data.keys()))
             value1 = (list(data.values()))
@@ -271,7 +271,7 @@ def ajax() :
                 selected_company_df = processed_df[processed_df['업체분류'] == i]
                 for j in selected_item :
                     selected_item_df = sales_report_by_date_function(selected_company_df, [j])
-                    a, b, c = days_sales(selected_item_df)
+                    a, b, c = days_sales_sales_volume(selected_item_df)
                     try :
                         data1[j].append([i, a, c])
                     except :
