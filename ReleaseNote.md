@@ -9,3 +9,8 @@ Version 1.2 Release Note
 3. Comma in thousands on sales
 4. Add Full Selection
 5. Add set order date or date option
+
+Version 1.3 Release Note
+1. Fixed graph error 
+2. Fixed sales analysis list
+3. Fixed reset button for selected company item
