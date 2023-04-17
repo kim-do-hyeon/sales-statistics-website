@@ -346,7 +346,6 @@ def ajax() :
                            report_data_key = report_data_key,
                            report_data_value = report_data_value)
         elif data['type'] == 'set_option' :
-            print(Option.query.all())
             if data['option'] == 'date' :
                 try :
                     Option.query.filter_by(id=1).update(dict(type='date'))
@@ -389,7 +388,7 @@ def sales_analysis() :
             data = (data.to_dict())
             a, b = list(data.keys()), list(data.values())
             companys_sales_data.append([a, b])
-        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', 'green', 'blue', 'purple', 'black', 'white']
+        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', '#F95BD0', '#215d6e', '#fafa6e', '#089f8f', '#fafa6e', '#ddeef2']
 
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
@@ -416,7 +415,6 @@ def sales_analysis() :
                         "종이상자", "스트로폼 박스", "용기 스티커", "기타", "세척마사", "질석",
                         "난석", "바크", "점적관수 4구세트", "점적관수 부속품", "관수자재"]
         product_data = sorted(product_data, key = lambda x: product_type)
-        print(product_data)
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
                             total_count_data = total_count_data,
@@ -465,7 +463,7 @@ def sales_analysis() :
             data = (data.to_dict())
             a, b = list(data.keys()), list(data.values())
             companys_sales_data.append([a, b])
-        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', 'green', 'blue', 'purple', 'black', 'white']
+        colors = ['#9BD0F5', '#D09BF5', '#F59BD0', '#F95BD0', '#215d6e', '#fafa6e', '#089f8f', '#fafa6e', '#ddeef2']
         
         # 매출 분석 - Pi Chart
         companys_sales_data_for_pi_chart = sales_analysis_companys(df)
@@ -482,11 +480,15 @@ def sales_analysis() :
                 temp = report_name[j].split("//")
                 if len(temp) == 1 :
                     if i.name == temp[0] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
                 else :
                     if i.name == temp[0] and i.standard == temp[1] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum[j]])
-        product_data = sorted(product_data, key = lambda x: x[1])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
+        product_type = ["묘목", "깨비상토", "피트모스", "펄라이트", "화분", "블루마스터", "코코화이버",
+                        "프로스트킵", "재노탄", "로도비트", "제초매트", "차압예냉기", "블루베리용기",
+                        "종이상자", "스트로폼 박스", "용기 스티커", "기타", "세척마사", "질석",
+                        "난석", "바크", "점적관수 4구세트", "점적관수 부속품", "관수자재"]
+        product_data = sorted(product_data, key = lambda x: product_type)
 
         return render_template("home/sales_analysis.html",
                             total_sales_data = total_sales_data,
