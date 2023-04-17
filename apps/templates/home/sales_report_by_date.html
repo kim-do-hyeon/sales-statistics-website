@@ -251,6 +251,10 @@
     while (form.firstChild) {
       form.removeChild(form.firstChild);
     }
+    const form_company = document.getElementById('selected_company');
+    while (form_company.firstChild){
+      form_company.removeChild(form_company.firstChild);
+    }
   }
   function select_all(A){
     if(A == 'company'){
