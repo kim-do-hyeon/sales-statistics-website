@@ -399,6 +399,7 @@ def sales_analysis() :
         report_name = list(report_sum.keys())
         report_sum = list(report_sum.values())
         report_count = list(df.groupby('매출 분석 리포트').count()['수량'].to_dict().values())
+        report_sum_count = list(df.groupby('매출 분석 리포트').sum()['수량'].to_dict().values())
         
         product_data = []
         for i in product_sql :
@@ -406,10 +407,10 @@ def sales_analysis() :
                 temp = report_name[j].split("//")
                 if len(temp) == 1 :
                     if i.name == temp[0] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum_count[j], format(int(report_sum[j]), ",")])
                 else :
                     if i.name == temp[0] and i.standard == temp[1] :
-                        product_data.append([i.type, i.name, i.standard, report_count[j], format(int(report_sum[j]), ",")])
+                        product_data.append([i.type, i.name, i.standard, report_count[j], report_sum_count[j], format(int(report_sum[j]), ",")])
         product_type = ["묘목", "깨비상토", "피트모스", "펄라이트", "화분", "블루마스터", "코코화이버",
                         "프로스트킵", "재노탄", "로도비트", "제초매트", "차압예냉기", "블루베리용기",
                         "종이상자", "스트로폼 박스", "용기 스티커", "기타", "세척마사", "질석",
