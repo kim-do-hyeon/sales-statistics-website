@@ -98,8 +98,8 @@
               </div>
               <table id="table" class="table align-items-center mb-0">
                 <thead id="thead">
-                  <th>품목</th>
-                  <th>통합 판매액</th>
+                  <tr id="thead_tr">
+                  </tr>
                 </thead>
                 <tbody id="tbody">
                 </tbody>
@@ -164,11 +164,26 @@
               const table = document.getElementById('table');
               const thead = document.getElementById('thead');
               const tbody = document.getElementById('tbody');
-
+              const thead_tr = document.getElementById("thead_tr");
               // Clean Table
               while (tbody.firstChild) {
                tbody.removeChild(tbody.firstChild);
               }
+              while (thead_tr.firstChild){
+                thead_tr.removeChild(thead_tr.firstChild);
+              }
+              const type = document.createElement("th");
+              type.textContent = "품목";
+              thead_tr.appendChild(type);
+              for(let i = 0; i < response.selected_company.length; i++){
+                const companys = document.createElement("th");
+                companys.textContent = response.selected_company[i];
+                thead_tr.appendChild(companys);
+              }
+              const total_sales = document.createElement("th");
+              total_sales.textContent = "통합 판매액";
+              thead_tr.appendChild(total_sales);
+              
 
               for (let i = 0; i < response.table_key.length; i++) {
                 const tbodyRow = document.createElement('tr');
@@ -177,6 +192,11 @@
                 const td2 = document.createElement('td');
                 td2.textContent = response.table_value[i];
                 tbodyRow.appendChild(td1);
+                for(let j = 0; j < response.company_datas[i].length; j++){
+                  const td3 = document.createElement('td');
+                  td3.textContent = response.company_datas[i][j];
+                  tbodyRow.appendChild(td3);
+                }
                 tbodyRow.appendChild(td2);
                 tbody.appendChild(tbodyRow);
               }
