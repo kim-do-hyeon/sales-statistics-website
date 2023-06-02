@@ -242,13 +242,19 @@ def ajax() :
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())
+            table_sum = 0
+            for i in value_table :
+                table_sum += int(i.replace(",", ""))
+            table_sum = format(int(table_sum), ",")
+            
             return jsonify(result = 'success',
                            d_k = d_k,
                            d_v = d_v,
                            table_key = key_table,
                            table_value = value_table,
                            report_data_key = report_data_key,
-                           report_data_value = report_data_value)
+                           report_data_value = report_data_value,
+                           table_sum = table_sum)
         elif data['type'] == 'sales_volume_report_by_date' :
             selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
@@ -341,10 +347,15 @@ def ajax() :
                 html_data[product] += '</tbody></table>'
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())
+            table_sum = 0
+            for i in value1 :
+                table_sum += i
 
-            return jsonify(result = 'success', d_k = d_k, d_c = d_c, table_key = key, table_value = value1,
+            return jsonify(result = 'success', d_k = d_k, d_c = d_c,
+                           table_key = key, table_value = value1,
                            report_data_key = report_data_key,
-                           report_data_value = report_data_value)
+                           report_data_value = report_data_value,
+                           table_sum = table_sum)
         elif data['type'] == 'set_option' :
             if data['option'] == 'date' :
                 try :
