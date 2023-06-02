@@ -201,6 +201,9 @@ def ajax() :
                     'sales_list': company_sales
                 }
             html_data = {}
+            ''' Ver 1.4 Start '''
+            company_datas = []
+            ''' Ver 1.4 End '''
             for product, value in product_info.items():
                 file_name = str(product).replace("/", "-")
                 html_data[product] = '<table class="table align-items-center mb-0" id="mytable_{}"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(file_name, product)
@@ -240,15 +243,34 @@ def ajax() :
                 html_data[product] += '<td>{}</td>'.format(temp)
                 html_data[product] += '</tr>'
                 html_data[product] += '</tbody></table>'
+                company_datas.append(result) # Ver 1.4
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())
+
+            ''' Ver 1.4 Start '''
+            table_sum = 0
+            for i in value_table :
+                table_sum += int(i.replace(",", ""))
+            table_sum = format(int(table_sum), ",")
+            total_company_datas = []
+            for i in range(len(company_datas)) :
+                temp = sum(company_datas[i])
+                temp = format(int(temp), ",")
+                total_company_datas.append(temp)
+                for j in range(len(company_datas[i])) :
+                    company_datas[i][j] = format(int(company_datas[i][j]), ",")
+            ''' Ver 1.4 End '''
             return jsonify(result = 'success',
                            d_k = d_k,
                            d_v = d_v,
                            table_key = key_table,
                            table_value = value_table,
                            report_data_key = report_data_key,
-                           report_data_value = report_data_value)
+                           report_data_value = report_data_value,
+                           table_sum = table_sum,
+                           company_datas = company_datas,
+                           selected_company = selected_company,
+                           total_company_datas = total_company_datas)
         elif data['type'] == 'sales_volume_report_by_date' :
             selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
@@ -300,6 +322,9 @@ def ajax() :
                     'sales_list': company_sales
                 }
             html_data = {}
+            ''' Ver 1.4 Start '''
+            company_datas = []
+            ''' Ver 1.4 End '''
             for product, value in product_info.items():
                 file_name = str(product).replace("/", "-")
                 html_data[product] = '<table class="table align-items-center mb-0" id="mytable_{}"><h3>{}의 판매 데이터</h3><thead><th>날짜</th>'.format(file_name, product)
@@ -339,12 +364,32 @@ def ajax() :
                 html_data[product] += '<td>{}</td>'.format(temp)
                 html_data[product] += '</tr>'
                 html_data[product] += '</tbody></table>'
+                company_datas.append(result) # Ver 1.4
             report_data_key = list(html_data.keys())
             report_data_value = list(html_data.values())
 
-            return jsonify(result = 'success', d_k = d_k, d_c = d_c, table_key = key, table_value = value1,
+            ''' Ver 1.4 Start '''
+            table_sum = 0
+            for i in value1 :
+                table_sum += i
+            table_sum = format(int(table_sum), ",")
+            total_company_datas = []
+            for i in range(len(company_datas)) :
+                temp = sum(company_datas[i])
+                temp = format(int(temp), ",")
+                total_company_datas.append(temp)
+                for j in range(len(company_datas[i])) :
+                    company_datas[i][j] = format(int(company_datas[i][j]), ",")
+            ''' Ver 1.4 End '''
+
+            return jsonify(result = 'success', d_k = d_k, d_c = d_c,
+                           table_key = key, table_value = value1,
                            report_data_key = report_data_key,
-                           report_data_value = report_data_value)
+                           report_data_value = report_data_value,
+                           table_sum = table_sum,
+                           company_datas = company_datas,
+                           selected_company = selected_company,
+                           total_company_datas = total_company_datas)
         elif data['type'] == 'set_option' :
             if data['option'] == 'date' :
                 try :

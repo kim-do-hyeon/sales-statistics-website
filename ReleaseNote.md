@@ -14,3 +14,7 @@ Version 1.3 Release Note
 1. Fixed graph error 
 2. Fixed sales analysis list
 3. Fixed reset button for selected company item
+
+Version 1.4 Release Note
+1. Add total rows to sales reports by date and sales reports by date
+2. Add a vendor-specific classification between daily sales by item and sales data for each item
