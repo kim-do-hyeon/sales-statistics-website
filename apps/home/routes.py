@@ -148,6 +148,7 @@ def ajax() :
                 else :
                     product_name.append(i.name + "/" + i.standard)
             return jsonify(result='success', data = product_name)
+        
         elif data['type'] == 'sales_report_by_date' :
             selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
@@ -259,7 +260,11 @@ def ajax() :
                 total_company_datas.append(temp)
                 for j in range(len(company_datas[i])) :
                     company_datas[i][j] = format(int(company_datas[i][j]), ",")
+            sums = [sum(int(row[i].replace(',', '')) for row in company_datas) for i in range(len(company_datas[0]))]
+            for i in range(len(sums)) :
+                sums[i] = format(sums[i], ",")
             ''' Ver 1.4 End '''
+
             return jsonify(result = 'success',
                            d_k = d_k,
                            d_v = d_v,
@@ -270,7 +275,8 @@ def ajax() :
                            table_sum = table_sum,
                            company_datas = company_datas,
                            selected_company = selected_company,
-                           total_company_datas = total_company_datas)
+                           total_company_datas = total_company_datas,
+                           sums = sums)
         elif data['type'] == 'sales_volume_report_by_date' :
             selected_company = list(set(data['companys']))
             selected_item = data['selected_products']
@@ -380,6 +386,9 @@ def ajax() :
                 total_company_datas.append(temp)
                 for j in range(len(company_datas[i])) :
                     company_datas[i][j] = format(int(company_datas[i][j]), ",")
+            sums = [sum(int(row[i].replace(',', '')) for row in company_datas) for i in range(len(company_datas[0]))]
+            for i in range(len(sums)) :
+                sums[i] = format(sums[i], ",")
             ''' Ver 1.4 End '''
 
             return jsonify(result = 'success', d_k = d_k, d_c = d_c,
@@ -389,7 +398,8 @@ def ajax() :
                            table_sum = table_sum,
                            company_datas = company_datas,
                            selected_company = selected_company,
-                           total_company_datas = total_company_datas)
+                           total_company_datas = total_company_datas,
+                           sums = sums)
         elif data['type'] == 'set_option' :
             if data['option'] == 'date' :
                 try :

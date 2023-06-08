@@ -204,12 +204,16 @@
               const tfooter = document.createElement('tr')
               const td1 = document.createElement('td')
               td1.textContent = "합계";
+              tfooter.appendChild(td1);
+              for(let i = 0; i < response.sums.length; i++){
+                const td2 = document.createElement('td');
+                td2.textContent = response.sums[i];
+                tfooter.appendChild(td2);
+              }
+              tbody.appendChild(tfooter);
               const td2 = document.createElement('td');
               td2.textContent = response.table_sum;
-              tfooter.appendChild(td1);
               tfooter.appendChild(td2);
-              tbody.appendChild(tfooter);
-
               const report_data = document.getElementById("report_data");
               report_data.innerHTML = response.report_data_value;
               console.log(response.report_data);
